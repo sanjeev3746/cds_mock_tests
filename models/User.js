@@ -26,7 +26,13 @@ const userSchema = new mongoose.Schema({
   phone: {
     type: String,
     trim: true,
-    match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number']
+    validate: {
+      validator: function(v) {
+        // Only validate if phone is provided
+        return !v || /^[0-9]{10}$/.test(v);
+      },
+      message: 'Please enter a valid 10-digit phone number'
+    }
   },
   isPremium: {
     type: Boolean,

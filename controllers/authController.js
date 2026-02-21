@@ -51,9 +51,12 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error('Register Error:', error);
+    console.error('Error Stack:', error.stack);
+    console.error('Error Message:', error.message);
     res.status(500).json({
       status: 'error',
-      message: 'Registration failed. Please try again.'
+      message: 'Registration failed. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
