@@ -51,6 +51,28 @@ function AdminUpload() {
         body: formData
       });
 
+      // Handle non-JSON responses (like 502 errors)
+      if (!response.ok) {
+        let errorMessage = 'Failed to upload PDF';
+        try {
+          const data = await response.json();
+          errorMessage = data.message || errorMessage;
+        } catch (jsonError) {
+          // Response is not JSON - likely a server error
+          if (response.status === 502) {
+            errorMessage = 'Server timeout - PDF may be too large or image-based. Try a smaller file or convert with OCR first.';
+          } else if (response.status === 413) {
+            errorMessage = 'File too large. Maximum size is 150MB.';
+          } else if (response.status === 408) {
+            errorMessage = 'Processing timeout. File may be too large or image-based.';
+          } else {
+            errorMessage = `Server error (${response.status}). Please try again.`;
+          }
+        }
+        setError(errorMessage);
+        return;
+      }
+
       const data = await response.json();
 
       if (data.status === 'success') {
@@ -61,12 +83,19 @@ function AdminUpload() {
         });
         setCurrentStep(2);
         setSuccess(`Successfully extracted ${data.data.totalQuestions} questions!`);
+      } else if (data.status === 'warning') {
+        // Image-based PDF warning
+        setError(data.message || 'PDF is image-based. Please convert with OCR first.');
       } else {
         setError(data.message || 'Failed to parse PDF');
       }
     } catch (err) {
       console.error('Upload Error:', err);
-      setError('Failed to upload PDF. Please try again.');
+      if (err.name === 'SyntaxError') {
+        setError('Server error processing PDF. File may be too large or corrupt.');
+      } else {
+        setError('Failed to upload PDF. Please try again.');
+      }
     } finally {
       setUploading(false);
     }

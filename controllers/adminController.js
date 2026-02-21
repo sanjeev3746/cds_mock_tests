@@ -35,8 +35,24 @@ exports.uploadPDF = [
         });
       }
 
-      // Parse PDF and extract questions
-      const result = await extractQuestionsFromPDF(req.file.buffer);
+      console.log(`Processing PDF: ${req.file.originalname}`);
+      console.log(`File size: ${(req.file.size / (1024 * 1024)).toFixed(2)} MB`);
+
+      // Warn if file is very large
+      if (req.file.size > 50 * 1024 * 1024) {
+        console.log('⚠️  Large file detected - processing may take longer');
+      }
+
+      // Set a timeout for parsing
+      const parseTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('PDF parsing timeout - file may be too large or image-based')), 45000)
+      );
+
+      // Parse PDF and extract questions with timeout
+      const result = await Promise.race([
+        extractQuestionsFromPDF(req.file.buffer),
+        parseTimeout
+      ]);
 
       if (!result.success) {
         return res.status(400).json({
@@ -46,20 +62,54 @@ exports.uploadPDF = [
         });
       }
 
+      // Check if PDF is likely image-based
+      if (result.rawText.length < 100) {
+        console.log('⚠️  Very little text extracted - PDF may be image-based (scanned)');
+        return res.json({
+          status: 'warning',
+          message: 'PDF appears to be image-based (scanned). Only text-based PDFs are supported. Please convert with OCR first.',
+          data: {
+            questions: result.questions,
+            totalQuestions: 0,
+            rawPreview: 'No extractable text found - this is likely a scanned/image-based PDF',
+            isImageBased: true
+          }
+        });
+      }
+
       res.json({
         status: 'success',
         message: `Extracted ${result.totalQuestions} questions from PDF`,
         data: {
           questions: result.questions,
           totalQuestions: result.totalQuestions,
-          rawPreview: result.rawText
+          rawPreview: result.rawText,
+          isImageBased: false
         }
       });
     } catch (error) {
       console.error('PDF Upload Error:', error);
+      
+      // Handle specific error types
+      if (error.message.includes('timeout')) {
+        return res.status(408).json({
+          status: 'error',
+          message: 'PDF processing timeout. File may be too large or image-based. Try a smaller file or convert with OCR.',
+          error: error.message
+        });
+      }
+
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({
+          status: 'error',
+          message: 'File too large. Maximum size is 150MB.',
+          error: error.message
+        });
+      }
+
       res.status(500).json({
         status: 'error',
-        message: 'Failed to process PDF',
+        message: 'Failed to process PDF. Make sure it\'s a valid text-based PDF.',
         error: error.message
       });
     }
