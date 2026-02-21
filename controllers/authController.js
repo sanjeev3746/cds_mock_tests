@@ -44,7 +44,8 @@ exports.register = async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          isPremium: user.isPremium
+          isPremium: user.isPremium,
+          isAdmin: user.isAdmin
         },
         token
       }
@@ -106,6 +107,7 @@ exports.login = async (req, res) => {
           name: user.name,
           email: user.email,
           isPremium: user.isPremium,
+          isAdmin: user.isAdmin,
           stats: user.stats
         },
         token
@@ -134,6 +136,7 @@ exports.getProfile = async (req, res) => {
           email: user.email,
           phone: user.phone,
           isPremium: user.isPremium,
+          isAdmin: user.isAdmin,
           premiumExpiresAt: user.premiumExpiresAt,
           testsAttempted: user.testsAttempted,
           lastTestDate: user.lastTestDate,
