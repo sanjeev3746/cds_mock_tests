@@ -20,7 +20,9 @@ function Navbar() {
               <li><Link to="/dashboard">Dashboard</Link></li>
               <li><Link to="/tests">Tests</Link></li>
               <li><Link to="/results">My Results</Link></li>
-              <li><Link to="/admin/upload" className="admin-link">📤 Upload PDF</Link></li>
+              {user.isAdmin && (
+                <li><Link to="/admin/upload" className="admin-link">📤 Upload PDF</Link></li>
+              )}
               <li>
                 <div className="user-menu">
                   <span className="user-name">{user.name}</span>

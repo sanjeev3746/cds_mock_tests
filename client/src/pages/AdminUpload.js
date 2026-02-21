@@ -177,7 +177,7 @@ function AdminUpload() {
               <div className="upload-text">
                 {file ? file.name : 'Click to select PDF file or drag & drop'}
               </div>
-              <div className="upload-hint">Maximum file size: 10MB</div>
+              <div className="upload-hint">Maximum file size: 50MB</div>
             </label>
           </div>
 

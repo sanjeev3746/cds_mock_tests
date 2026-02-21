@@ -1,25 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
-const { protect } = require('../middleware/auth');
+const { protect, adminOnly } = require('../middleware/auth');
 
-// All admin routes require authentication
-// In production, add additional admin role check
+// All admin routes require authentication and admin role
 
 // @route   POST /api/admin/upload-pdf
 // @desc    Upload PDF and extract questions
-router.post('/upload-pdf', protect, adminController.uploadPDF);
+router.post('/upload-pdf', protect, adminOnly, adminController.uploadPDF);
 
 // @route   POST /api/admin/create-test-from-pdf
 // @desc    Create test from extracted questions
-router.post('/create-test-from-pdf', protect, adminController.createTestFromPDF);
+router.post('/create-test-from-pdf', protect, adminOnly, adminController.createTestFromPDF);
 
 // @route   GET /api/admin/tests
 // @desc    Get all tests (admin view)
-router.get('/tests', protect, adminController.getAllTests);
+router.get('/tests', protect, adminOnly, adminController.getAllTests);
 
 // @route   DELETE /api/admin/tests/:id
 // @desc    Delete a test
-router.delete('/tests/:id', protect, adminController.deleteTest);
+router.delete('/tests/:id', protect, adminOnly, adminController.deleteTest);
 
 module.exports = router;
