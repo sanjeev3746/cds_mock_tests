@@ -15,7 +15,7 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/dashboard`, {
+      const response = await fetch('/api/admin/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -43,7 +43,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/tests/${testId}`, {
+      const response = await fetch(`/api/admin/tests/${testId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
