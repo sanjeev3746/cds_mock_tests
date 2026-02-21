@@ -5,6 +5,10 @@ const { protect, adminOnly } = require('../middleware/auth');
 
 // All admin routes require authentication and admin role
 
+// @route   GET /api/admin/dashboard
+// @desc    Get dashboard statistics
+router.get('/dashboard', protect, adminOnly, adminController.getDashboardStats);
+
 // @route   POST /api/admin/upload-pdf
 // @desc    Upload PDF and extract questions
 router.post('/upload-pdf', protect, adminOnly, adminController.uploadPDF);

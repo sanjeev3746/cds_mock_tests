@@ -1,5 +1,8 @@
 const multer = require('multer');
 const Test = require('../models/Test');
+const User = require('../models/User');
+const Attempt = require('../models/Attempt');
+const Result = require('../models/Result');
 const { extractQuestionsFromPDF, categorizeQuestions } = require('../utils/pdfParser');
 
 // Configure multer for memory storage
@@ -195,6 +198,69 @@ exports.deleteTest = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to delete test'
+    });
+  }
+};
+
+// @desc    Get dashboard statistics
+// @route   GET /api/admin/dashboard
+// @access  Private (Admin only)
+exports.getDashboardStats = async (req, res) => {
+  try {
+    // Get counts
+    const totalUsers = await User.countDocuments();
+    const totalTests = await Test.countDocuments();
+    const totalAttempts = await Attempt.countDocuments();
+    const totalResults = await Result.countDocuments();
+
+    // Get recent tests
+    const recentTests = await Test.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('title duration totalMarks attemptsCount createdAt isActive');
+
+    // Get recent attempts with user details
+    const recentAttempts = await Attempt.find()
+      .populate('userId', 'name email')
+      .populate('testId', 'title')
+      .sort({ startedAt: -1 })
+      .limit(10);
+
+    // Get top performers (from results)
+    const topPerformers = await Result.find()
+      .populate('userId', 'name email')
+      .populate('testId', 'title')
+      .sort({ percentage: -1 })
+      .limit(10)
+      .select('userId testId score totalScore percentage createdAt');
+
+    // Calculate stats
+    const activeTests = await Test.countDocuments({ isActive: true });
+    const premiumUsers = await User.countDocuments({ isPremium: true });
+    const completedAttempts = await Attempt.countDocuments({ status: 'completed' });
+
+    res.json({
+      status: 'success',
+      data: {
+        stats: {
+          totalUsers,
+          totalTests,
+          totalAttempts,
+          totalResults,
+          activeTests,
+          premiumUsers,
+          completedAttempts
+        },
+        recentTests,
+        recentAttempts,
+        topPerformers
+      }
+    });
+  } catch (error) {
+    console.error('Dashboard Stats Error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch dashboard statistics'
     });
   }
 };
