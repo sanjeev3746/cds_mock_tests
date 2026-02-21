@@ -1,0 +1,173 @@
+.leaderboard-page {
+  padding: 40px 0;
+  min-height: calc(100vh - 60px);
+}
+
+.user-rank-card {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3);
+}
+
+.rank-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.rank-number {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  padding: 20px 32px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+}
+
+.rank-details h3 {
+  font-size: 24px;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+}
+
+.rank-details p {
+  color: var(--primary-dark);
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.participants-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 32px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+}
+
+.participants-count {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.participants-label {
+  font-size: 14px;
+  color: var(--primary-dark);
+  opacity: 0.8;
+}
+
+.leaderboard-table-container {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table thead {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+.leaderboard-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.leaderboard-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.3s ease;
+}
+
+.leaderboard-table tbody tr:hover {
+  background: var(--light-bg);
+}
+
+.leaderboard-table tbody tr.current-user {
+  background: #e8f5e9;
+  font-weight: 600;
+}
+
+.leaderboard-table tbody tr.current-user:hover {
+  background: #c8e6c9;
+}
+
+.leaderboard-table td {
+  padding: 16px;
+  font-size: 14px;
+}
+
+.rank-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.medal {
+  font-size: 20px;
+}
+
+.name-cell {
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.score-cell {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--light-text);
+  font-size: 16px;
+}
+
+@media (max-width: 992px) {
+  .leaderboard-table {
+    font-size: 12px;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .user-rank-card {
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  .rank-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .leaderboard-table-container {
+    overflow-x: auto;
+  }
+
+  .leaderboard-table {
+    min-width: 700px;
+  }
+}
