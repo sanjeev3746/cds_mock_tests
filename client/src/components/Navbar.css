@@ -111,6 +111,19 @@
   background: var(--light-bg);
 }
 
+.admin-link {
+  background: rgba(255, 215, 0, 0.2);
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  font-weight: 600 !important;
+}
+
+.admin-link:hover {
+  background: rgba(255, 215, 0, 0.3);
+  color: #ffd700 !important;
+}
+
 @media (max-width: 768px) {
   .nav-links {
     gap: 12px;
