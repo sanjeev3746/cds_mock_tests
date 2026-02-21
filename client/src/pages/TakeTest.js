@@ -50,7 +50,8 @@ function TakeTest() {
         // Load saved answers
         const savedAnswers = {};
         if (data.data.attempt.currentAnswers) {
-          data.data.attempt.currentAnswers.forEach((value, key) => {
+          // currentAnswers is now a plain object (converted from Map on backend)
+          Object.entries(data.data.attempt.currentAnswers).forEach(([key, value]) => {
             savedAnswers[key] = value.selectedAnswer;
           });
         }

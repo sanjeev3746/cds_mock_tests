@@ -154,7 +154,7 @@ exports.startTest = async (req, res) => {
 exports.getAttempt = async (req, res) => {
   try {
     const attempt = await Attempt.findById(req.params.attemptId)
-      .populate('test', '-sections.questions.correctAnswer -sections.questions.explanation');
+      .populate('test');
 
     if (!attempt) {
       return res.status(404).json({
@@ -182,15 +182,26 @@ exports.getAttempt = async (req, res) => {
       });
     }
 
+    // Convert attempt to object and handle Map type for currentAnswers
+    const attemptObj = attempt.toObject();
+    
+    // Convert Map to plain object for JSON serialization
+    if (attemptObj.currentAnswers instanceof Map) {
+      attemptObj.currentAnswers = Object.fromEntries(attemptObj.currentAnswers);
+    }
+
     res.json({
       status: 'success',
-      data: { attempt }
+      data: { attempt: attemptObj }
     });
   } catch (error) {
     console.error('Get Attempt Error:', error);
+    console.error('Error Stack:', error.stack);
+    console.error('Error Message:', error.message);
     res.status(500).json({
       status: 'error',
-      message: 'Failed to fetch attempt'
+      message: 'Failed to fetch attempt',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
