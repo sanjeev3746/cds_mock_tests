@@ -221,18 +221,18 @@ exports.getDashboardStats = async (req, res) => {
 
     // Get recent attempts with user details
     const recentAttempts = await Attempt.find()
-      .populate('userId', 'name email')
-      .populate('testId', 'title')
+      .populate('user', 'name email')
+      .populate('test', 'title')
       .sort({ startedAt: -1 })
       .limit(10);
 
     // Get top performers (from results)
     const topPerformers = await Result.find()
-      .populate('userId', 'name email')
-      .populate('testId', 'title')
-      .sort({ percentage: -1 })
+      .populate('user', 'name email')
+      .populate('test', 'title')
+      .sort({ 'score.percentage': -1 })
       .limit(10)
-      .select('userId testId score totalScore percentage createdAt');
+      .select('user test score timeMetrics.submittedAt');
 
     // Calculate stats
     const activeTests = await Test.countDocuments({ isActive: true });

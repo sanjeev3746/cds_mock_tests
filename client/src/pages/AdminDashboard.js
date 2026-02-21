@@ -222,9 +222,9 @@ const AdminDashboard = () => {
               </div>
               <div className="activity-content">
                 <p className="activity-user">
-                  <strong>{attempt.userId?.name}</strong> 
+                  <strong>{attempt.user?.name}</strong> 
                   {attempt.status === 'completed' ? ' completed ' : ' started '}
-                  <strong>{attempt.testId?.title}</strong>
+                  <strong>{attempt.test?.title}</strong>
                 </p>
                 <p className="activity-time">{formatDate(attempt.startedAt)}</p>
               </div>
@@ -256,13 +256,13 @@ const AdminDashboard = () => {
                       {index + 1}
                     </span>
                   </td>
-                  <td>{result.userId?.name}</td>
-                  <td>{result.testId?.title}</td>
-                  <td>{result.score}/{result.totalScore}</td>
+                  <td>{result.user?.name}</td>
+                  <td>{result.test?.title}</td>
+                  <td>{result.score?.obtainedMarks}/{result.score?.totalMarks}</td>
                   <td>
-                    <span className="percentage">{result.percentage.toFixed(1)}%</span>
+                    <span className="percentage">{result.score?.percentage?.toFixed(1)}%</span>
                   </td>
-                  <td>{formatDate(result.createdAt)}</td>
+                  <td>{formatDate(result.timeMetrics?.submittedAt)}</td>
                 </tr>
               ))}
             </tbody>
