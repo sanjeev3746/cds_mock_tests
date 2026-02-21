@@ -264,5 +264,3 @@ exports.getDashboardStats = async (req, res) => {
     });
   }
 };
-
-module.exports = exports;
