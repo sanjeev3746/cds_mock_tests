@@ -1,0 +1,326 @@
+.admin-upload-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.admin-upload-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.admin-upload-header h1 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.admin-upload-header p {
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+/* Progress Steps */
+.upload-steps {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.3;
+  transition: opacity 0.3s;
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+}
+
+.step.active .step-number {
+  background: var(--primary-color);
+}
+
+.step-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Upload Section */
+.upload-section {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.upload-box {
+  margin-bottom: 2rem;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-label {
+  display: block;
+  padding: 3rem;
+  border: 3px dashed var(--border-color);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: var(--bg-light);
+}
+
+.upload-label:hover {
+  border-color: var(--primary-color);
+  background: white;
+}
+
+.upload-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.upload-text {
+  font-size: 1.1rem;
+  color: var(--text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.upload-hint {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.upload-instructions {
+  background: var(--bg-light);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.upload-instructions h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.upload-instructions ul {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.upload-instructions li {
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.example-format {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.example-format pre {
+  margin-top: 0.5rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  white-space: pre-wrap;
+}
+
+/* Review Section */
+.review-section {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.test-info-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.test-info-form h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Questions List */
+.questions-list {
+  margin-bottom: 2rem;
+}
+
+.questions-list h3 {
+  margin-bottom: 0.5rem;
+}
+
+.hint {
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+}
+
+.question-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.question-number {
+  font-weight: bold;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.btn-delete:hover {
+  opacity: 1;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.option-item label {
+  font-weight: bold;
+  min-width: 25px;
+}
+
+.question-meta {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  font-weight: 500;
+}
+
+.alert-error {
+  background: #fee;
+  color: #c33;
+  border: 1px solid #fcc;
+}
+
+.alert-success {
+  background: #efe;
+  color: #3c3;
+  border: 1px solid #cfc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-upload-container {
+    padding: 1rem;
+  }
+
+  .upload-steps {
+    gap: 1rem;
+  }
+
+  .step-label {
+    font-size: 0.8rem;
+  }
+
+  .question-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+}

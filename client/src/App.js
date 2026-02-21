@@ -12,6 +12,7 @@ import Results from './pages/Results';
 import ResultDetail from './pages/ResultDetail';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
+import AdminUpload from './pages/AdminUpload';
 import { AuthContext } from './context/AuthContext';
 import { getAuthToken, removeAuthToken } from './utils/auth';
 
@@ -78,6 +79,7 @@ function App() {
             <Route path="/results/:id" element={user ? <ResultDetail /> : <Navigate to="/login" />} />
             <Route path="/leaderboard/:testId" element={user ? <Leaderboard /> : <Navigate to="/login" />} />
             <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
+            <Route path="/admin/upload" element={user ? <AdminUpload /> : <Navigate to="/login" />} />
           </Routes>
         </div>
       </Router>
