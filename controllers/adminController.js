@@ -1,4 +1,5 @@
 const multer = require('multer');
+const pdfParse = require('pdf-parse');
 const Test = require('../models/Test');
 const User = require('../models/User');
 const Attempt = require('../models/Attempt');
@@ -38,17 +39,44 @@ exports.uploadPDF = [
       console.log(`Processing PDF: ${req.file.originalname}`);
       console.log(`File size: ${(req.file.size / (1024 * 1024)).toFixed(2)} MB`);
 
-      // Warn if file is very large
-      if (req.file.size > 50 * 1024 * 1024) {
-        console.log('⚠️  Large file detected - processing may take longer');
+      // Check if file is too large for free tier memory (practical limit)
+      if (req.file.size > 30 * 1024 * 1024) {
+        return res.status(413).json({
+          status: 'error',
+          message: 'File too large for processing. Please use a file under 30MB. For larger files, split the PDF into smaller parts or compress it first.',
+          fileSizeMB: (req.file.size / (1024 * 1024)).toFixed(2)
+        });
       }
 
-      // Set a timeout for parsing
-      const parseTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('PDF parsing timeout - file may be too large or image-based')), 45000)
-      );
+      // Quick check: Try to parse just first page to see if it's text-based
+      let quickCheck;
+      try {
+        quickCheck = await pdfParse(req.file.buffer, { max: 1 }); // Just first page
+        console.log(`Quick check - First page text length: ${quickCheck.text.length}`);
+        
+        if (quickCheck.text.length < 50) {
+          console.log('⚠️  Very little text on first page - PDF is likely image-based');
+          return res.json({
+            status: 'warning',
+            message: 'This PDF appears to be image-based (scanned). Only text-based PDFs are supported. Please:\n1. Convert with OCR at ilovepdf.com/ocr-pdf\n2. Or use a text-based PDF where you can select/highlight text',
+            data: {
+              questions: [],
+              totalQuestions: 0,
+              rawPreview: 'Image-based PDF detected - no selectable text found',
+              isImageBased: true
+            }
+          });
+        }
+      } catch (quickError) {
+        console.log('Quick check failed:', quickError.message);
+      }
 
       // Parse PDF and extract questions with timeout
+      console.log('Starting full PDF parse...');
+      const parseTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('PDF parsing timeout')), 30000) // 30 seconds
+      );
+
       const result = await Promise.race([
         extractQuestionsFromPDF(req.file.buffer),
         parseTimeout
@@ -59,21 +87,6 @@ exports.uploadPDF = [
           status: 'error',
           message: 'Failed to parse PDF',
           error: result.error
-        });
-      }
-
-      // Check if PDF is likely image-based
-      if (result.rawText.length < 100) {
-        console.log('⚠️  Very little text extracted - PDF may be image-based (scanned)');
-        return res.json({
-          status: 'warning',
-          message: 'PDF appears to be image-based (scanned). Only text-based PDFs are supported. Please convert with OCR first.',
-          data: {
-            questions: result.questions,
-            totalQuestions: 0,
-            rawPreview: 'No extractable text found - this is likely a scanned/image-based PDF',
-            isImageBased: true
-          }
         });
       }
 
@@ -94,7 +107,7 @@ exports.uploadPDF = [
       if (error.message.includes('timeout')) {
         return res.status(408).json({
           status: 'error',
-          message: 'PDF processing timeout. File may be too large or image-based. Try a smaller file or convert with OCR.',
+          message: 'PDF processing timeout. Try a smaller file or convert with OCR first.',
           error: error.message
         });
       }
