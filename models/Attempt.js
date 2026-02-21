@@ -44,7 +44,6 @@ const attemptSchema = new mongoose.Schema({
 
 // Index for quick lookups
 attemptSchema.index({ user: 1, test: 1, status: 1 });
-attemptSchema.index({ expiresAt: 1 });
 
 // Auto-delete expired attempts (TTL index)
 attemptSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
