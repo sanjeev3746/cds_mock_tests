@@ -131,10 +131,25 @@ const ManualTestCreator = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          ...testData,
+          title: testData.title,
+          description: testData.description,
+          duration: parseInt(testData.duration),
+          isPremium: testData.isPremium,
+          negativeMarking: {
+            enabled: testData.negativeMarking,
+            deduction: parseFloat(testData.negativeMarks)
+          },
           sections: sections.map(section => ({
             name: section.name,
-            questions: section.questions
+            totalMarks: section.questions.length,
+            duration: Math.ceil(parseInt(testData.duration) / sections.length),
+            questions: section.questions.map(q => ({
+              question: q.questionText,
+              options: q.options,
+              correctAnswer: ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer),
+              explanation: q.explanation || '',
+              marks: 1
+            }))
           }))
         })
       });

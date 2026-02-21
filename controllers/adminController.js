@@ -218,7 +218,7 @@ exports.createTestFromPDF = async (req, res) => {
 // @access  Private (Admin only)
 exports.createTestManual = async (req, res) => {
   try {
-    const { title, description, duration, negativeMarking, negativeMarks, passingPercentage, isPremium, sections } = req.body;
+    const { title, description, duration, negativeMarking, isPremium, sections } = req.body;
 
     // Validate
     if (!title || !sections || sections.length === 0) {
@@ -238,18 +238,13 @@ exports.createTestManual = async (req, res) => {
       });
     }
 
-    // Calculate passing marks
-    const passingMarks = Math.ceil((totalQuestions * (passingPercentage || 33)) / 100);
-
     // Create test
     const test = await Test.create({
       title,
       description: description || `Manual test with ${totalQuestions} questions`,
       duration: duration || 120,
       totalMarks: totalQuestions,
-      passingMarks,
-      negativeMarking: negativeMarking !== undefined ? negativeMarking : true,
-      negativeMarks: negativeMarks || 0.33,
+      negativeMarking: negativeMarking || { enabled: true, deduction: 0.33 },
       sections,
       isPremium: isPremium || false,
       isActive: true
