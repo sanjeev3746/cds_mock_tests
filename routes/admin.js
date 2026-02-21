@@ -17,6 +17,10 @@ router.post('/upload-pdf', protect, adminOnly, adminController.uploadPDF);
 // @desc    Create test from extracted questions
 router.post('/create-test-from-pdf', protect, adminOnly, adminController.createTestFromPDF);
 
+// @route   POST /api/admin/create-test-manual
+// @desc    Create test manually without PDF
+router.post('/create-test-manual', protect, adminOnly, adminController.createTestManual);
+
 // @route   GET /api/admin/tests
 // @desc    Get all tests (admin view)
 router.get('/tests', protect, adminOnly, adminController.getAllTests);

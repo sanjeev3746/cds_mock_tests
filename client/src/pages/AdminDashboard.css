@@ -46,6 +46,16 @@
   border-color: var(--primary-color);
 }
 
+.create-action {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.create-action:hover {
+  box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+}
+
 .upload-action {
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
   color: white;
@@ -54,6 +64,11 @@
 
 .upload-action:hover {
   box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+.create-action p,
+.upload-action p {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .action-icon {

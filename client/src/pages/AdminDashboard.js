@@ -100,25 +100,25 @@ const AdminDashboard = () => {
 
       {/* Quick Actions */}
       <div className="quick-actions">
+        <Link to="/admin/create" className="action-card create-action">
+          <div className="action-icon">✏️</div>
+          <h3>Create Test</h3>
+          <p>Add questions manually</p>
+        </Link>
         <Link to="/admin/upload" className="action-card upload-action">
           <div className="action-icon">📤</div>
           <h3>Upload PDF</h3>
-          <p>Create tests from PDF files</p>
+          <p>Extract from PDF files</p>
         </Link>
         <div className="action-card" onClick={() => navigate('/tests')}>
           <div className="action-icon">📝</div>
           <h3>View Tests</h3>
-          <p>Browse all available tests</p>
+          <p>Browse all tests</p>
         </div>
         <div className="action-card">
           <div className="action-icon">👥</div>
           <h3>Users</h3>
-          <p>{stats.stats.totalUsers} registered users</p>
-        </div>
-        <div className="action-card">
-          <div className="action-icon">🏆</div>
-          <h3>Results</h3>
-          <p>{stats.stats.totalResults} completed tests</p>
+          <p>{stats.stats.totalUsers} registered</p>
         </div>
       </div>
 

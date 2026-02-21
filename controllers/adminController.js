@@ -213,6 +213,65 @@ exports.createTestFromPDF = async (req, res) => {
   }
 };
 
+// @desc    Create test manually
+// @route   POST /api/admin/create-test-manual
+// @access  Private (Admin only)
+exports.createTestManual = async (req, res) => {
+  try {
+    const { title, description, duration, negativeMarking, negativeMarks, passingPercentage, isPremium, sections } = req.body;
+
+    // Validate
+    if (!title || !sections || sections.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Title and at least one section with questions are required'
+      });
+    }
+
+    // Count total questions
+    const totalQuestions = sections.reduce((sum, section) => sum + section.questions.length, 0);
+
+    if (totalQuestions === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'At least one question is required'
+      });
+    }
+
+    // Calculate passing marks
+    const passingMarks = Math.ceil((totalQuestions * (passingPercentage || 33)) / 100);
+
+    // Create test
+    const test = await Test.create({
+      title,
+      description: description || `Manual test with ${totalQuestions} questions`,
+      duration: duration || 120,
+      totalMarks: totalQuestions,
+      passingMarks,
+      negativeMarking: negativeMarking !== undefined ? negativeMarking : true,
+      negativeMarks: negativeMarks || 0.33,
+      sections,
+      isPremium: isPremium || false,
+      isActive: true
+    });
+
+    console.log(`✅ Manual test created: ${test.title} with ${totalQuestions} questions`);
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Test created successfully',
+      data: { test }
+    });
+  } catch (error) {
+    console.error('Create Manual Test Error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to create test',
+      error: error.message
+    });
+  }
+};
+
 // @desc    Get all tests (admin view)
 // @route   GET /api/admin/tests
 // @access  Private (Admin only)
