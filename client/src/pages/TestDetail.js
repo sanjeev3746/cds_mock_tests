@@ -13,6 +13,7 @@ function TestDetail() {
 
   useEffect(() => {
     fetchTestDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchTestDetail = async () => {

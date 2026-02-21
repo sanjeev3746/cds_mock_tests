@@ -10,6 +10,7 @@ function ResultDetail() {
 
   useEffect(() => {
     fetchResultDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchResultDetail = async () => {

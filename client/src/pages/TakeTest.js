@@ -23,12 +23,14 @@ function TakeTest() {
         clearInterval(timerRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attemptId]);
 
   useEffect(() => {
     if (attempt) {
       startTimer();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt]);
 
   const fetchAttempt = async () => {
