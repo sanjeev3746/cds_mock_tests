@@ -62,3 +62,14 @@ exports.premiumOnly = (req, res, next) => {
 
   next();
 };
+
+// Middleware to check if user is admin
+exports.adminOnly = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({
+      status: 'error',
+      message: 'Access denied. Admin privileges required.'
+    });
+  }
+  next();
+};
