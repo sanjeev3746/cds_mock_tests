@@ -50,7 +50,7 @@ const testSchema = new mongoose.Schema({
     name: {
       type: String,
       required: true,
-      enum: ['English', 'GK', 'Maths']
+      trim: true
     },
     questions: [questionSchema],
     totalMarks: {
