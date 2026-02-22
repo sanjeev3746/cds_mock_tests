@@ -368,6 +368,39 @@ exports.deleteTest = async (req, res) => {
   }
 };
 
+// @desc    Toggle test active status
+// @route   PATCH /api/admin/tests/:id/toggle-status
+// @access  Private (Admin only)
+exports.toggleTestStatus = async (req, res) => {
+  try {
+    const { isActive } = req.body;
+    const test = await Test.findByIdAndUpdate(
+      req.params.id,
+      { isActive },
+      { new: true }
+    );
+
+    if (!test) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Test not found'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      message: `Test ${isActive ? 'activated' : 'deactivated'} successfully`,
+      data: { test }
+    });
+  } catch (error) {
+    console.error('Toggle Test Status Error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to update test status'
+    });
+  }
+};
+
 // @desc    Get dashboard statistics
 // @route   GET /api/admin/dashboard
 // @access  Private (Admin only)

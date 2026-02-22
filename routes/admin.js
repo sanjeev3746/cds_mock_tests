@@ -29,4 +29,8 @@ router.get('/tests', protect, adminOnly, adminController.getAllTests);
 // @desc    Delete a test
 router.delete('/tests/:id', protect, adminOnly, adminController.deleteTest);
 
+// @route   PATCH /api/admin/tests/:id/toggle-status
+// @desc    Toggle test active status
+router.patch('/tests/:id/toggle-status', protect, adminOnly, adminController.toggleTestStatus);
+
 module.exports = router;

@@ -110,10 +110,10 @@ const AdminDashboard = () => {
           <h3>Upload PDF</h3>
           <p>Extract from PDF files</p>
         </Link>
-        <div className="action-card" onClick={() => navigate('/tests')}>
+        <div className="action-card" onClick={() => navigate('/admin/tests')}>
           <div className="action-icon">📝</div>
-          <h3>View Tests</h3>
-          <p>Browse all tests</p>
+          <h3>Manage Tests</h3>
+          <p>View, edit & delete tests</p>
         </div>
         <div className="action-card">
           <div className="action-icon">👥</div>
