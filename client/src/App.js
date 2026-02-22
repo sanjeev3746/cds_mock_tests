@@ -16,6 +16,7 @@ import AdminUpload from './pages/AdminUpload';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminTests from './pages/AdminTests';
 import ManualTestCreator from './pages/ManualTestCreator';
+import EditTest from './pages/EditTest';
 import { AuthContext } from './context/AuthContext';
 import { getAuthToken, removeAuthToken } from './utils/auth';
 
@@ -86,6 +87,7 @@ function App() {
             <Route path="/admin/upload" element={user ? <AdminUpload /> : <Navigate to="/login" />} />
             <Route path="/admin/tests" element={user ? <AdminTests /> : <Navigate to="/login" />} />
             <Route path="/admin/create" element={user ? <ManualTestCreator /> : <Navigate to="/login" />} />
+            <Route path="/admin/edit-test/:id" element={user ? <EditTest /> : <Navigate to="/login" />} />
           </Routes>
         </div>
       </Router>

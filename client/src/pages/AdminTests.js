@@ -204,7 +204,7 @@ const AdminTests = () => {
                       </button>
                       <button
                         className="btn-view"
-                        onClick={() => navigate(`/test/${test._id}`)}
+                        onClick={() => navigate(`/tests/${test._id}`)}
                         title="View Test"
                       >
                         👁

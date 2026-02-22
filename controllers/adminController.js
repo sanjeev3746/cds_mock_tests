@@ -316,6 +316,97 @@ exports.createTestManual = async (req, res) => {
   }
 };
 
+// @desc    Get single test by ID
+// @route   GET /api/admin/tests/:id
+// @access  Private (Admin only)
+exports.getTestById = async (req, res) => {
+  try {
+    const test = await Test.findById(req.params.id);
+
+    if (!test) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Test not found'
+      });
+    }
+
+    res.json({
+      status: 'success',
+      data: { test }
+    });
+  } catch (error) {
+    console.error('Get Test By ID Error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch test'
+    });
+  }
+};
+
+// @desc    Update a test
+// @route   PUT /api/admin/tests/:id
+// @access  Private (Admin only)
+exports.updateTest = async (req, res) => {
+  try {
+    const { title, description, duration, negativeMarking, isPremium, sections } = req.body;
+
+    // Validate
+    if (!title || !sections || sections.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Title and at least one section with questions are required'
+      });
+    }
+
+    // Count total questions
+    const totalQuestions = sections.reduce((sum, section) => sum + section.questions.length, 0);
+
+    if (totalQuestions === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'At least one question is required'
+      });
+    }
+
+    // Update test
+    const test = await Test.findByIdAndUpdate(
+      req.params.id,
+      {
+        title,
+        description: description || `Test with ${totalQuestions} questions`,
+        duration: duration || 120,
+        totalMarks: totalQuestions,
+        negativeMarking: negativeMarking || { enabled: true, deduction: 0.33 },
+        sections,
+        isPremium: isPremium || false
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!test) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Test not found'
+      });
+    }
+
+    console.log(`✅ Test updated: ${test.title} with ${totalQuestions} questions`);
+
+    res.json({
+      status: 'success',
+      message: 'Test updated successfully',
+      data: { test }
+    });
+  } catch (error) {
+    console.error('Update Test Error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to update test',
+      error: error.message
+    });
+  }
+};
+
 // @desc    Get all tests (admin view)
 // @route   GET /api/admin/tests
 // @access  Private (Admin only)

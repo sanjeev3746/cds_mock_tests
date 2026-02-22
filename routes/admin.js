@@ -25,6 +25,14 @@ router.post('/create-test-manual', protect, adminOnly, adminController.createTes
 // @desc    Get all tests (admin view)
 router.get('/tests', protect, adminOnly, adminController.getAllTests);
 
+// @route   GET /api/admin/tests/:id
+// @desc    Get single test for editing
+router.get('/tests/:id', protect, adminOnly, adminController.getTestById);
+
+// @route   PUT /api/admin/tests/:id
+// @desc    Update a test
+router.put('/tests/:id', protect, adminOnly, adminController.updateTest);
+
 // @route   DELETE /api/admin/tests/:id
 // @desc    Delete a test
 router.delete('/tests/:id', protect, adminOnly, adminController.deleteTest);
