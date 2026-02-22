@@ -66,7 +66,7 @@ const ManualTestCreator = () => {
     newSections[currentSection].questions.push({
       questionText: currentQuestion.questionText,
       options: currentQuestion.options.filter(opt => opt.trim()),
-      correctAnswer: parseInt(currentQuestion.correctAnswer),
+      correctAnswer: currentQuestion.correctAnswer,
       explanation: currentQuestion.explanation
     });
 
@@ -146,7 +146,7 @@ const ManualTestCreator = () => {
             questions: section.questions.map(q => ({
               question: q.questionText,
               options: q.options,
-              correctAnswer: ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer),
+              correctAnswer: parseInt(q.correctAnswer),
               explanation: q.explanation || '',
               marks: 1
             }))
