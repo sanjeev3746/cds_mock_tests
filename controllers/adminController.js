@@ -220,6 +220,13 @@ exports.createTestManual = async (req, res) => {
   try {
     const { title, description, duration, negativeMarking, isPremium, sections } = req.body;
 
+    console.log('📝 Manual Test Creation Request:', {
+      title,
+      duration,
+      sectionsCount: sections?.length,
+      negativeMarking
+    });
+
     // Validate
     if (!title || !sections || sections.length === 0) {
       return res.status(400).json({
@@ -228,8 +235,38 @@ exports.createTestManual = async (req, res) => {
       });
     }
 
-    // Count total questions
-    const totalQuestions = sections.reduce((sum, section) => sum + section.questions.length, 0);
+    // Count total questions and validate sections
+    let totalQuestions = 0;
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      console.log(`Section ${i + 1}: ${section.name} - ${section.questions?.length || 0} questions`);
+      
+      if (!section.questions || section.questions.length === 0) {
+        return res.status(400).json({
+          status: 'error',
+          message: `Section "${section.name}" has no questions`
+        });
+      }
+
+      // Validate each question
+      for (let j = 0; j < section.questions.length; j++) {
+        const q = section.questions[j];
+        if (!q.question || !q.options || q.options.length < 2) {
+          return res.status(400).json({
+            status: 'error',
+            message: `Question ${j + 1} in section "${section.name}" is invalid`
+          });
+        }
+        if (q.correctAnswer < 0 || q.correctAnswer > 3) {
+          return res.status(400).json({
+            status: 'error',
+            message: `Question ${j + 1} in section "${section.name}" has invalid correct answer: ${q.correctAnswer}`
+          });
+        }
+      }
+
+      totalQuestions += section.questions.length;
+    }
 
     if (totalQuestions === 0) {
       return res.status(400).json({
@@ -239,7 +276,7 @@ exports.createTestManual = async (req, res) => {
     }
 
     // Create test
-    const test = await Test.create({
+    const testData = {
       title,
       description: description || `Manual test with ${totalQuestions} questions`,
       duration: duration || 120,
@@ -248,7 +285,11 @@ exports.createTestManual = async (req, res) => {
       sections,
       isPremium: isPremium || false,
       isActive: true
-    });
+    };
+
+    console.log('Creating test with data:', JSON.stringify(testData, null, 2));
+
+    const test = await Test.create(testData);
 
     console.log(`✅ Manual test created: ${test.title} with ${totalQuestions} questions`);
 
@@ -259,10 +300,18 @@ exports.createTestManual = async (req, res) => {
     });
   } catch (error) {
     console.error('Create Manual Test Error:', error);
+    console.error('Error details:', error.message);
+    if (error.errors) {
+      console.error('Validation errors:', JSON.stringify(error.errors, null, 2));
+    }
     res.status(500).json({
       status: 'error',
       message: 'Failed to create test',
-      error: error.message
+      error: error.message,
+      details: error.errors ? Object.keys(error.errors).map(key => ({
+        field: key,
+        message: error.errors[key].message
+      })) : []
     });
   }
 };
