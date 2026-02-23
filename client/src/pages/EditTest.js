@@ -24,6 +24,7 @@ const EditTest = () => {
     correctAnswer: '',
     explanation: ''
   });
+  const [editIndex, setEditIndex] = useState(null); // For editing individual questions
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -59,10 +60,14 @@ const EditTest = () => {
         const transformedSections = test.sections.map(section => ({
           name: section.name,
           questions: section.questions.map(q => ({
+            questionType: q.questionType || 'normal',
+            directions: q.directions || '',
             questionText: q.question,
-            options: q.options,
-            correctAnswer: q.correctAnswer,
-            explanation: q.explanation || ''
+            options: q.options || ['', '', '', ''],
+            correctAnswer: q.correctAnswer || '',
+            explanation: q.explanation || '',
+            arrangementParts: q.arrangementParts || ['', '', '', ''],
+            arrangementOrder: q.questionType === 'arrangement' ? q.correctAnswer : ''
           }))
         }));
 
@@ -111,13 +116,16 @@ const EditTest = () => {
     }
 
     const newSections = [...sections];
-    newSections[currentSection].questions.push({
-      questionText: currentQuestion.questionText,
-      options: currentQuestion.options.filter(opt => opt.trim()),
-      correctAnswer: currentQuestion.correctAnswer,
-      explanation: currentQuestion.explanation
-    });
-
+    if (editIndex !== null) {
+      // Edit existing question
+      newSections[currentSection].questions[editIndex] = { ...currentQuestion };
+      setEditIndex(null);
+      setSuccess('Question updated!');
+    } else {
+      // Add new question
+      newSections[currentSection].questions.push({ ...currentQuestion });
+      setSuccess(`Question added! Total: ${newSections[currentSection].questions.length}`);
+    }
     setSections(newSections);
     setCurrentQuestion({
       questionText: '',
@@ -126,8 +134,33 @@ const EditTest = () => {
       explanation: ''
     });
     setError('');
-    setSuccess(`Question added! Total: ${newSections[currentSection].questions.length}`);
     setTimeout(() => setSuccess(''), 2000);
+  };
+
+  // Edit a question
+  const handleEditQuestion = (q, idx) => {
+    setCurrentQuestion({ ...q });
+    setEditIndex(idx);
+    setError('');
+    setSuccess('Editing question...');
+  };
+
+  // Rearrangement (drag-and-drop)
+  const handleDragStart = (e, idx) => {
+    e.dataTransfer.setData('drag-question-index', idx);
+  };
+  const handleDrop = (e, dropIdx) => {
+    const dragIdx = parseInt(e.dataTransfer.getData('drag-question-index'));
+    if (dragIdx === dropIdx) return;
+    const newSections = [...sections];
+    const questions = [...newSections[currentSection].questions];
+    const [moved] = questions.splice(dragIdx, 1);
+    questions.splice(dropIdx, 0, moved);
+    newSections[currentSection].questions = questions;
+    setSections(newSections);
+  };
+  const handleDragOver = (e) => {
+    e.preventDefault();
   };
 
   const removeQuestion = (sectionIndex, questionIndex) => {
@@ -332,49 +365,119 @@ const EditTest = () => {
 
       {/* Add Question Form */}
       <div className="creator-section">
-        <h2>Add Question to {sections[currentSection]?.name}</h2>
+        <h2>Add/Edit Question to {sections[currentSection]?.name}</h2>
         <div className="question-form">
+          <div className="form-group">
+            <label>Directions (optional)</label>
+            <textarea
+              value={currentQuestion.directions}
+              onChange={e => handleQuestionChange('directions', e.target.value)}
+              placeholder="Write directions for this question (e.g., Arrange the parts to form a meaningful sentence)"
+              rows="2"
+            />
+          </div>
           <div className="form-group">
             <label>Question Text *</label>
             <textarea
               value={currentQuestion.questionText}
-              onChange={(e) => handleQuestionChange('questionText', e.target.value)}
+              onChange={e => handleQuestionChange('questionText', e.target.value)}
               placeholder="Enter your question here..."
               rows="3"
             />
+            <div style={{marginTop: '0.5rem'}}>
+              <button type="button" onClick={() => {
+                // Insert underline tags for selected text
+                const sel = window.getSelection();
+                if (sel && sel.toString()) {
+                  const label = prompt('Label this part (P, Q, R, S):');
+                  if (label && ['P','Q','R','S'].includes(label.toUpperCase())) {
+                    const newText = currentQuestion.questionText.replace(sel.toString(), `<u>${sel.toString()}</u> (${label.toUpperCase()})`);
+                    handleQuestionChange('questionText', newText);
+                  }
+                } else {
+                  alert('Select text in the box above to underline and label.');
+                }
+              }}>Underline & Label Selected</button>
+            </div>
           </div>
-
-          <div className="options-grid">
-            {currentQuestion.options.map((option, index) => (
-              <div key={index} className="option-input">
-                <label>Option {String.fromCharCode(65 + index)}</label>
+          {currentQuestion.questionType === 'arrangement' ? (
+            <>
+              <div className="arrangement-grid">
+                {["P", "Q", "R", "S"].map((label, idx) => (
+                  <div key={label} className="arrangement-part">
+                    <label>Part {label}</label>
+                    <input
+                      type="text"
+                      value={currentQuestion.arrangementParts[idx]}
+                      onChange={e => {
+                        const parts = [...currentQuestion.arrangementParts];
+                        parts[idx] = e.target.value;
+                        handleQuestionChange('arrangementParts', parts);
+                      }}
+                      placeholder={`Enter part ${label}`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="form-group">
+                <label>Correct Order (e.g., PQRS)</label>
                 <input
                   type="text"
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                  value={currentQuestion.arrangementOrder}
+                  onChange={e => handleQuestionChange('arrangementOrder', e.target.value.toUpperCase())}
+                  maxLength={4}
+                  placeholder="PQRS"
                 />
               </div>
-            ))}
-          </div>
-
-          <div className="form-group">
-            <label>Correct Answer *</label>
-            <select
-              value={currentQuestion.correctAnswer}
-              onChange={(e) => handleQuestionChange('correctAnswer', e.target.value)}
-            >
-              <option value="">Select correct answer</option>
-              {currentQuestion.options.map((option, index) => (
-                option.trim() && (
-                  <option key={index} value={index}>
-                    Option {String.fromCharCode(65 + index)}: {option.substring(0, 50)}
-                  </option>
-                )
-              ))}
-            </select>
-          </div>
-
+              <div className="arrangement-preview">
+                <strong>Preview:</strong>
+                <div>
+                  {["P", "Q", "R", "S"].map((label, idx) => (
+                    <span key={label} style={{ marginRight: 8 }}>
+                      <strong>{label}:</strong> {currentQuestion.arrangementParts[idx] || <em>...</em>}
+                    </span>
+                  ))}
+                </div>
+                {currentQuestion.arrangementOrder.length === 4 && (
+                  <div style={{ marginTop: 8 }}>
+                    <strong>Order:</strong> {currentQuestion.arrangementOrder.split('').map(l => currentQuestion.arrangementParts[["P","Q","R","S"].indexOf(l)]).join(' ')}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="options-grid">
+                {currentQuestion.options.map((option, index) => (
+                  <div key={index} className="option-input">
+                    <label>Option {String.fromCharCode(65 + index)}</label>
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="form-group">
+                <label>Correct Answer *</label>
+                <select
+                  value={currentQuestion.correctAnswer}
+                  onChange={(e) => handleQuestionChange('correctAnswer', e.target.value)}
+                >
+                  <option value="">Select correct answer</option>
+                  {currentQuestion.options.map((option, index) => (
+                    option.trim() && (
+                      <option key={index} value={index}>
+                        Option {String.fromCharCode(65 + index)}: {option.substring(0, 50)}
+                      </option>
+                    )
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
           <div className="form-group">
             <label>Explanation (optional)</label>
             <textarea
@@ -384,7 +487,6 @@ const EditTest = () => {
               rows="2"
             />
           </div>
-
           <button className="btn-add-question" onClick={addQuestion}>
             + Add Question
           </button>
@@ -397,9 +499,23 @@ const EditTest = () => {
           <h2>Questions in {sections[currentSection].name} ({sections[currentSection].questions.length})</h2>
           <div className="questions-list">
             {sections[currentSection].questions.map((q, index) => (
-              <div key={index} className="question-preview">
+              <div
+                key={index}
+                className="question-preview"
+                draggable
+                onDragStart={e => handleDragStart(e, index)}
+                onDrop={e => handleDrop(e, index)}
+                onDragOver={handleDragOver}
+                style={{ cursor: 'move', opacity: editIndex === index ? 0.5 : 1 }}
+              >
                 <div className="question-header">
                   <h4>Q{index + 1}. {q.questionText}</h4>
+                  <button
+                    className="btn-edit-question"
+                    onClick={() => handleEditQuestion(q, index)}
+                  >
+                    ✎
+                  </button>
                   <button
                     className="btn-remove-question"
                     onClick={() => removeQuestion(currentSection, index)}
@@ -424,6 +540,9 @@ const EditTest = () => {
                 )}
               </div>
             ))}
+          </div>
+          <div style={{fontSize: '0.9em', color: '#888', marginTop: 8}}>
+            Drag and drop questions to rearrange. Click ✎ to edit.
           </div>
         </div>
       )}

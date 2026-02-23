@@ -55,7 +55,7 @@ function Results() {
                   <div>
                     <h3>{result.test.title}</h3>
                     <p className="test-meta">
-                      {result.test.type.replace('-', ' ')} • {result.test.category}
+                      {/* Question type badge removed as requested */} {result.test.category}
                     </p>
                   </div>
                   <div className="result-rank">

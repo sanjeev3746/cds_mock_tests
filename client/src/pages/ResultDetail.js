@@ -54,7 +54,7 @@ function ResultDetail() {
           <div className="result-title">
             <h1>{result.test.title}</h1>
             <p className="test-info">
-              {result.test.type.replace('-', ' ')} • {result.test.category}
+              {/* Question type badge removed as requested */} {result.test.category}
             </p>
           </div>
           <Link to={`/leaderboard/${result.test._id}`} className="btn btn-primary">

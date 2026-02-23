@@ -86,9 +86,7 @@ function TestDetail() {
         <div className="test-detail-card">
           <div className="detail-header">
             <h1>{test.title}</h1>
-            <span className={`test-badge ${test.type}`}>
-              {test.type.replace('-', ' ')}
-            </span>
+            {/* Question type badge removed as requested */}
           </div>
 
           <p className="test-description">{test.description}</p>

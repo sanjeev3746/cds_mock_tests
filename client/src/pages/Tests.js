@@ -82,9 +82,7 @@ function Tests() {
               <div key={test._id} className="test-card">
                 <div className="test-header">
                   <h3>{test.title}</h3>
-                  <span className={`test-badge ${test.type}`}>
-                    {test.type.replace('-', ' ')}
-                  </span>
+                  {/* Question type badge removed as requested */}
                 </div>
                 <p className="test-description">{test.description}</p>
                 <div className="test-details">

@@ -163,7 +163,7 @@ const AdminTests = () => {
                 <th>Marks</th>
                 <th>Attempts</th>
                 <th>Status</th>
-                <th>Type</th>
+                {/* Question type column removed as requested */}
                 <th>Created</th>
                 <th>Actions</th>
               </tr>
