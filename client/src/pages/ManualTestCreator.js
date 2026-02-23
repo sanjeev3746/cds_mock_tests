@@ -21,10 +21,14 @@ const ManualTestCreator = () => {
 
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState({
+    questionType: 'normal',
+    directions: '',
     questionText: '',
     options: ['', '', '', ''],
     correctAnswer: '',
-    explanation: ''
+    explanation: '',
+    arrangementParts: ['', '', '', ''],
+    arrangementOrder: ''
   });
 
   const [error, setError] = useState('');
@@ -46,36 +50,55 @@ const ManualTestCreator = () => {
   };
 
   const addQuestion = () => {
+    // Validate directions is optional
     if (!currentQuestion.questionText.trim()) {
       setError('Question text is required');
       return;
     }
 
-    const filledOptions = currentQuestion.options.filter(opt => opt.trim());
-    if (filledOptions.length < 2) {
-      setError('At least 2 options are required');
-      return;
-    }
-
-    if (!currentQuestion.correctAnswer) {
-      setError('Please select the correct answer');
-      return;
+    if (currentQuestion.questionType === 'arrangement') {
+      // Validate all parts
+      if (currentQuestion.arrangementParts.some(part => !part.trim())) {
+        setError('All arrangement parts (P, Q, R, S) are required');
+        return;
+      }
+      if (!currentQuestion.arrangementOrder.trim() || currentQuestion.arrangementOrder.length !== 4) {
+        setError('Please specify the correct order (e.g., PQRS)');
+        return;
+      }
+    } else {
+      const filledOptions = currentQuestion.options.filter(opt => opt.trim());
+      if (filledOptions.length < 2) {
+        setError('At least 2 options are required');
+        return;
+      }
+      if (!currentQuestion.correctAnswer) {
+        setError('Please select the correct answer');
+        return;
+      }
     }
 
     const newSections = [...sections];
     newSections[currentSection].questions.push({
+      questionType: currentQuestion.questionType,
+      directions: currentQuestion.directions,
       questionText: currentQuestion.questionText,
-      options: currentQuestion.options.filter(opt => opt.trim()),
-      correctAnswer: currentQuestion.correctAnswer,
-      explanation: currentQuestion.explanation
+      options: currentQuestion.questionType === 'arrangement' ? [] : currentQuestion.options.filter(opt => opt.trim()),
+      correctAnswer: currentQuestion.questionType === 'arrangement' ? currentQuestion.arrangementOrder.toUpperCase() : currentQuestion.correctAnswer,
+      explanation: currentQuestion.explanation,
+      arrangementParts: currentQuestion.questionType === 'arrangement' ? currentQuestion.arrangementParts : undefined
     });
 
     setSections(newSections);
     setCurrentQuestion({
+      questionType: 'normal',
+      directions: '',
       questionText: '',
       options: ['', '', '', ''],
       correctAnswer: '',
-      explanation: ''
+      explanation: '',
+      arrangementParts: ['', '', '', ''],
+      arrangementOrder: ''
     });
     setError('');
     setSuccess(`Question added! Total: ${newSections[currentSection].questions.length}`);
@@ -289,6 +312,25 @@ const ManualTestCreator = () => {
         <h2>Add Question to {sections[currentSection].name}</h2>
         <div className="question-form">
           <div className="form-group">
+            <label>Directions (optional)</label>
+            <textarea
+              value={currentQuestion.directions}
+              onChange={e => handleQuestionChange('directions', e.target.value)}
+              placeholder="Write directions for this question (e.g., Arrange the parts to form a meaningful sentence)"
+              rows="2"
+            />
+          </div>
+          <div className="form-group">
+            <label>Question Type</label>
+            <select
+              value={currentQuestion.questionType}
+              onChange={e => handleQuestionChange('questionType', e.target.value)}
+            >
+              <option value="normal">Normal (MCQ)</option>
+              <option value="arrangement">Sentence Arrangement</option>
+            </select>
+          </div>
+          <div className="form-group">
             <label>Question Text *</label>
             <textarea
               value={currentQuestion.questionText}
@@ -297,38 +339,84 @@ const ManualTestCreator = () => {
               rows="3"
             />
           </div>
-
-          <div className="options-grid">
-            {currentQuestion.options.map((option, index) => (
-              <div key={index} className="option-input">
-                <label>Option {String.fromCharCode(65 + index)}</label>
+          {currentQuestion.questionType === 'arrangement' ? (
+            <>
+              <div className="arrangement-grid">
+                {["P", "Q", "R", "S"].map((label, idx) => (
+                  <div key={label} className="arrangement-part">
+                    <label>Part {label}</label>
+                    <input
+                      type="text"
+                      value={currentQuestion.arrangementParts[idx]}
+                      onChange={e => {
+                        const parts = [...currentQuestion.arrangementParts];
+                        parts[idx] = e.target.value;
+                        handleQuestionChange('arrangementParts', parts);
+                      }}
+                      placeholder={`Enter part ${label}`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="form-group">
+                <label>Correct Order (e.g., PQRS)</label>
                 <input
                   type="text"
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                  value={currentQuestion.arrangementOrder}
+                  onChange={e => handleQuestionChange('arrangementOrder', e.target.value.toUpperCase())}
+                  maxLength={4}
+                  placeholder="PQRS"
                 />
               </div>
-            ))}
-          </div>
-
-          <div className="form-group">
-            <label>Correct Answer *</label>
-            <select
-              value={currentQuestion.correctAnswer}
-              onChange={(e) => handleQuestionChange('correctAnswer', e.target.value)}
-            >
-              <option value="">Select correct answer</option>
-              {currentQuestion.options.map((option, index) => (
-                option.trim() && (
-                  <option key={index} value={index}>
-                    Option {String.fromCharCode(65 + index)}: {option.substring(0, 50)}
-                  </option>
-                )
-              ))}
-            </select>
-          </div>
-
+              <div className="arrangement-preview">
+                <strong>Preview:</strong>
+                <div>
+                  {["P", "Q", "R", "S"].map((label, idx) => (
+                    <span key={label} style={{ marginRight: 8 }}>
+                      <strong>{label}:</strong> {currentQuestion.arrangementParts[idx] || <em>...</em>}
+                    </span>
+                  ))}
+                </div>
+                {currentQuestion.arrangementOrder.length === 4 && (
+                  <div style={{ marginTop: 8 }}>
+                    <strong>Order:</strong> {currentQuestion.arrangementOrder.split('').map(l => currentQuestion.arrangementParts[["P","Q","R","S"].indexOf(l)]).join(' ')}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="options-grid">
+                {currentQuestion.options.map((option, index) => (
+                  <div key={index} className="option-input">
+                    <label>Option {String.fromCharCode(65 + index)}</label>
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="form-group">
+                <label>Correct Answer *</label>
+                <select
+                  value={currentQuestion.correctAnswer}
+                  onChange={(e) => handleQuestionChange('correctAnswer', e.target.value)}
+                >
+                  <option value="">Select correct answer</option>
+                  {currentQuestion.options.map((option, index) => (
+                    option.trim() && (
+                      <option key={index} value={index}>
+                        Option {String.fromCharCode(65 + index)}: {option.substring(0, 50)}
+                      </option>
+                    )
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
           <div className="form-group">
             <label>Explanation (Optional)</label>
             <textarea
@@ -338,7 +426,6 @@ const ManualTestCreator = () => {
               rows="2"
             />
           </div>
-
           <button className="btn-add-question" onClick={addQuestion}>
             ➕ Add Question
           </button>
