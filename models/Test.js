@@ -1,25 +1,34 @@
 const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
+  questionType: {
+    type: String,
+    enum: ['normal', 'arrangement'],
+    default: 'normal'
+  },
+  directions: {
+    type: String,
+    trim: true
+  },
   question: {
     type: String,
     required: true,
     trim: true
   },
   options: [{
-    type: String,
-    required: true
+    type: String
   }],
   correctAnswer: {
-    type: Number,
-    required: true,
-    min: 0,
-    max: 3
+    type: String,
+    required: true
   },
   explanation: {
     type: String,
     trim: true
   },
+  arrangementParts: [{
+    type: String
+  }],
   marks: {
     type: Number,
     default: 1

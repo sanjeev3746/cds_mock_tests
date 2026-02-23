@@ -251,17 +251,39 @@ exports.createTestManual = async (req, res) => {
       // Validate each question
       for (let j = 0; j < section.questions.length; j++) {
         const q = section.questions[j];
-        if (!q.question || !q.options || q.options.length < 2) {
+        if (!q.questionType) q.questionType = 'normal';
+        if (!q.question || typeof q.question !== 'string' || !q.question.trim()) {
           return res.status(400).json({
             status: 'error',
-            message: `Question ${j + 1} in section "${section.name}" is invalid`
+            message: `Question ${j + 1} in section "${section.name}" is missing question text.`
           });
         }
-        if (q.correctAnswer < 0 || q.correctAnswer > 3) {
-          return res.status(400).json({
-            status: 'error',
-            message: `Question ${j + 1} in section "${section.name}" has invalid correct answer: ${q.correctAnswer}`
-          });
+        if (q.questionType === 'arrangement') {
+          if (!q.arrangementParts || q.arrangementParts.length !== 4 || q.arrangementParts.some(part => !part.trim())) {
+            return res.status(400).json({
+              status: 'error',
+              message: `Question ${j + 1} in section "${section.name}" must have all 4 arrangement parts.`
+            });
+          }
+          if (!q.correctAnswer || typeof q.correctAnswer !== 'string' || q.correctAnswer.length !== 4) {
+            return res.status(400).json({
+              status: 'error',
+              message: `Question ${j + 1} in section "${section.name}" must have a valid arrangement order (e.g., PQRS).`
+            });
+          }
+        } else {
+          if (!q.options || q.options.length < 2) {
+            return res.status(400).json({
+              status: 'error',
+              message: `Question ${j + 1} in section "${section.name}" must have at least 2 options.`
+            });
+          }
+          if (q.correctAnswer === undefined || q.correctAnswer === '' || isNaN(Number(q.correctAnswer))) {
+            return res.status(400).json({
+              status: 'error',
+              message: `Question ${j + 1} in section "${section.name}" must have a valid correct answer index.`
+            });
+          }
         }
       }
 
