@@ -401,8 +401,13 @@ const ManualTestCreator = () => {
                       type="text"
                       value={option}
                       onChange={(e) => handleOptionChange(index, e.target.value)}
-                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                      placeholder={`Option ${String.fromCharCode(65 + index)} — use $...$ for math`}
                     />
+                    {option && option.includes('$') && (
+                      <div className="math-preview" style={{ marginTop: '4px', padding: '4px 8px' }}>
+                        <MathText text={option} />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
