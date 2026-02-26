@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getAuthToken } from '../utils/auth';
+import MathText from '../components/MathText';
 import './ManualTestCreator.css';
 
 const EditTest = () => {
@@ -381,9 +382,15 @@ const EditTest = () => {
             <textarea
               value={currentQuestion.questionText}
               onChange={e => handleQuestionChange('questionText', e.target.value)}
-              placeholder="Enter your question here..."
+              placeholder="Enter your question here... Use $...$ for math, e.g. $x^2 + \frac{1}{x} = 5$"
               rows="3"
             />
+            {currentQuestion.questionText && currentQuestion.questionText.trim() && (
+              <div className="math-preview">
+                <span className="math-preview-label">Preview:</span>
+                <MathText text={currentQuestion.questionText} />
+              </div>
+            )}
             <div style={{marginTop: '0.5rem'}}>
               <button type="button" onClick={() => {
                 // Insert underline tags for selected text
@@ -455,8 +462,13 @@ const EditTest = () => {
                       type="text"
                       value={option}
                       onChange={(e) => handleOptionChange(index, e.target.value)}
-                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                      placeholder={`Option ${String.fromCharCode(65 + index)} — use $...$ for math`}
                     />
+                    {option && option.trim() && option.includes('$') && (
+                      <div className="math-preview" style={{ marginTop: '4px', padding: '4px 8px' }}>
+                        <MathText text={option} />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -509,7 +521,7 @@ const EditTest = () => {
                 style={{ cursor: 'move', opacity: editIndex === index ? 0.5 : 1 }}
               >
                 <div className="question-header">
-                  <h4>Q{index + 1}. {q.questionText}</h4>
+                  <h4>Q{index + 1}. <MathText text={q.questionText} /></h4>
                   <button
                     className="btn-edit-question"
                     onClick={() => handleEditQuestion(q, index)}
@@ -529,7 +541,7 @@ const EditTest = () => {
                       key={optIndex}
                       className={`option-preview ${q.correctAnswer === optIndex ? 'correct' : ''}`}
                     >
-                      {String.fromCharCode(65 + optIndex)}. {opt}
+                      {String.fromCharCode(65 + optIndex)}. <MathText text={opt} />
                     </div>
                   ))}
                 </div>
