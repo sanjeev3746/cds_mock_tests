@@ -1,0 +1,25 @@
+services:
+  # ─── Backend API (Node.js on Render) ───────────────────────────────────────
+  - type: web
+    name: cds-mock-test-api
+    runtime: node
+    region: singapore          # closest to India
+    plan: free
+    rootDir: .
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      # Set these secret values in the Render dashboard → Environment
+      - key: MONGODB_URI
+        sync: false            # manually set in dashboard
+      - key: JWT_SECRET
+        sync: false            # manually set in dashboard
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: CLIENT_URL
+        sync: false            # set to your Vercel URL e.g. https://cds-mock-test.vercel.app

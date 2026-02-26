@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthToken } from '../utils/auth';
+import MathText from '../components/MathText';
 import './ManualTestCreator.css';
 
 const ManualTestCreator = () => {
@@ -335,9 +336,15 @@ const ManualTestCreator = () => {
             <textarea
               value={currentQuestion.questionText}
               onChange={(e) => handleQuestionChange('questionText', e.target.value)}
-              placeholder="Enter your question here..."
+              placeholder="Enter your question here. Use $...$ for inline math and $$...$$ for block math. e.g. If $x^3 + \\frac{1}{x^3} = \\frac{65}{8}$, find $xy$"
               rows="3"
             />
+            {currentQuestion.questionText && currentQuestion.questionText.includes('$') && (
+              <div className="math-preview">
+                <span className="math-preview-label">Preview:</span>
+                <MathText text={currentQuestion.questionText} />
+              </div>
+            )}
           </div>
           {currentQuestion.questionType === 'arrangement' ? (
             <>
@@ -440,7 +447,7 @@ const ManualTestCreator = () => {
             {sections[currentSection].questions.map((q, qIndex) => (
               <div key={qIndex} className="question-preview">
                 <div className="question-preview-header">
-                  <strong>Q{qIndex + 1}.</strong> {q.questionText}
+                  <strong>Q{qIndex + 1}.</strong> <MathText text={q.questionText} />
                   <button
                     className="btn-remove-question"
                     onClick={() => removeQuestion(currentSection, qIndex)}
@@ -454,7 +461,7 @@ const ManualTestCreator = () => {
                       key={optIndex}
                       className={`preview-option ${q.correctAnswer === optIndex ? 'correct' : ''}`}
                     >
-                      {String.fromCharCode(65 + optIndex)}) {opt}
+                      {String.fromCharCode(65 + optIndex)}) <MathText text={opt} />
                     </div>
                   ))}
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getAuthToken, formatTime } from '../utils/auth';
+import MathText from '../components/MathText';
 import './TakeTest.css';
 
 function TakeTest() {
@@ -220,7 +221,7 @@ function TakeTest() {
                   Question {currentQuestion + 1}
                 </div>
                 <div className="question-text">
-                  {question.question}
+                  <MathText text={question.question} />
                 </div>
 
                 <div className="options">
@@ -237,7 +238,7 @@ function TakeTest() {
                         onChange={() => {}}
                       />
                       <span className="option-label">{String.fromCharCode(65 + idx)}.</span>
-                      <span className="option-text">{option}</span>
+                      <span className="option-text"><MathText text={option} /></span>
                     </div>
                   ))}
                 </div>

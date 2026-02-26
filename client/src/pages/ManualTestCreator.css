@@ -375,3 +375,39 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Math equation preview */
+.math-preview {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: #f0f4ff;
+  border-left: 3px solid #4f46e5;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  color: #333;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.math-preview-label {
+  font-weight: 600;
+  color: #4f46e5;
+  flex-shrink: 0;
+}
+
+.math-text .katex {
+  font-size: 1.05em;
+}
+
+.math-block {
+  display: block;
+  overflow-x: auto;
+}
+
+/* LaTeX hint in placeholder style */
+.form-group textarea::placeholder {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
