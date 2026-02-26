@@ -339,7 +339,7 @@ const ManualTestCreator = () => {
               placeholder="Enter your question here. Use $...$ for inline math and $$...$$ for block math. e.g. If $x^3 + \\frac{1}{x^3} = \\frac{65}{8}$, find $xy$"
               rows="3"
             />
-            {currentQuestion.questionText && currentQuestion.questionText.includes('$') && (
+            {currentQuestion.questionText && currentQuestion.questionText.trim() && (
               <div className="math-preview">
                 <span className="math-preview-label">Preview:</span>
                 <MathText text={currentQuestion.questionText} />
@@ -403,7 +403,7 @@ const ManualTestCreator = () => {
                       onChange={(e) => handleOptionChange(index, e.target.value)}
                       placeholder={`Option ${String.fromCharCode(65 + index)} — use $...$ for math`}
                     />
-                    {option && option.includes('$') && (
+                    {option && option.trim() && option.includes('$') && (
                       <div className="math-preview" style={{ marginTop: '4px', padding: '4px 8px' }}>
                         <MathText text={option} />
                       </div>
