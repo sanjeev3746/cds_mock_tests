@@ -220,6 +220,11 @@ function TakeTest() {
                 <div className="question-number">
                   Question {currentQuestion + 1}
                 </div>
+                {question.directions && (
+                  <div className="question-directions">
+                    <MathText text={question.directions} />
+                  </div>
+                )}
                 <div className="question-text">
                   <MathText text={question.question} />
                 </div>

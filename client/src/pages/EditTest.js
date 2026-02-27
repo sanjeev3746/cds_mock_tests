@@ -20,6 +20,7 @@ const EditTest = () => {
   const [sections, setSections] = useState([]);
   const [currentSection, setCurrentSection] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState({
+    directions: '',
     questionText: '',
     options: ['', '', '', ''],
     correctAnswer: '',
@@ -129,6 +130,7 @@ const EditTest = () => {
     }
     setSections(newSections);
     setCurrentQuestion({
+      directions: '',
       questionText: '',
       options: ['', '', '', ''],
       correctAnswer: '',

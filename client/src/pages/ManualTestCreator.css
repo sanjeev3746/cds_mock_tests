@@ -411,3 +411,28 @@
   font-size: 0.85rem;
   color: #9ca3af;
 }
+
+/* Markdown table rendered inside MathText */
+.math-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.6rem 0;
+  font-size: 0.95rem;
+}
+
+.math-table th,
+.math-table td {
+  border: 1px solid #d1d5db;
+  padding: 6px 12px;
+  text-align: left;
+}
+
+.math-table thead tr {
+  background: #e8ecff;
+  font-weight: 600;
+  color: #1e1b4b;
+}
+
+.math-table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
