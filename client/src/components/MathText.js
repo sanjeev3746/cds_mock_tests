@@ -120,4 +120,4 @@ function MathText({ text }) {
 }
 
 export default MathText;
-
+ 

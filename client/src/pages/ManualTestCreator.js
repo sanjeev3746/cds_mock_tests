@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthToken } from '../utils/auth';
 import MathText from '../components/MathText';
@@ -35,6 +35,21 @@ const ManualTestCreator = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const questionTextRef = useRef(null);
+
+  const insertTableTemplate = () => {
+    const template = `\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
+    const el = questionTextRef.current;
+    if (el) {
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const newText = currentQuestion.questionText.slice(0, start) + template + currentQuestion.questionText.slice(end);
+      handleQuestionChange('questionText', newText);
+      setTimeout(() => { el.selectionStart = el.selectionEnd = start + template.length; el.focus(); }, 0);
+    } else {
+      handleQuestionChange('questionText', currentQuestion.questionText + template);
+    }
+  };
 
   const handleTestDataChange = (field, value) => {
     setTestData({ ...testData, [field]: value });
@@ -334,11 +349,16 @@ const ManualTestCreator = () => {
           <div className="form-group">
             <label>Question Text *</label>
             <textarea
+              ref={questionTextRef}
               value={currentQuestion.questionText}
               onChange={(e) => handleQuestionChange('questionText', e.target.value)}
-              placeholder="Enter your question here. Use $...$ for inline math and $$...$$ for block math. e.g. If $x^3 + \\frac{1}{x^3} = \\frac{65}{8}$, find $xy$"
-              rows="3"
+              placeholder="Enter question here. Use $...$ for math e.g. $x^2$, or click 'Insert Table' to add a table."
+              rows="4"
             />
+            <div className="question-toolbar">
+              <button type="button" className="toolbar-btn" onClick={insertTableTemplate}>📊 Insert Table</button>
+              <span className="toolbar-hint">Math: <code>$x^2$</code> or <code>$$\frac{{a}}{{b}}$$</code></span>
+            </div>
             {currentQuestion.questionText && currentQuestion.questionText.trim() && (
               <div className="math-preview">
                 <span className="math-preview-label">Preview:</span>
@@ -451,6 +471,11 @@ const ManualTestCreator = () => {
           <div className="questions-list">
             {sections[currentSection].questions.map((q, qIndex) => (
               <div key={qIndex} className="question-preview">
+                {q.directions && q.directions.trim() && (
+                  <div className="preview-directions">
+                    <strong>Direction:</strong> <MathText text={q.directions} />
+                  </div>
+                )}
                 <div className="question-preview-header">
                   <strong>Q{qIndex + 1}.</strong> <MathText text={q.questionText} />
                   <button
