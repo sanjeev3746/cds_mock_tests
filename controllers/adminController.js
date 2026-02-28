@@ -576,3 +576,76 @@ exports.getDashboardStats = async (req, res) => {
     });
   }
 };
+
+// @desc    Get all users
+// @route   GET /api/admin/users
+// @access  Private (Admin only)
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({})
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    // Enrich with attempt/result counts
+    const enriched = await Promise.all(users.map(async (u) => {
+      const [attempts, results] = await Promise.all([
+        Attempt.countDocuments({ user: u._id }),
+        Result.countDocuments({ user: u._id })
+      ]);
+      return { ...u.toObject(), attemptsCount: attempts, resultsCount: results };
+    }));
+
+    res.json({ status: 'success', data: { users: enriched } });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch users' });
+  }
+};
+
+// @desc    Toggle user admin status
+// @route   PATCH /api/admin/users/:id/toggle-admin
+// @access  Private (Admin only)
+exports.toggleUserAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ status: 'error', message: 'User not found' });
+    user.isAdmin = !user.isAdmin;
+    await user.save();
+    res.json({ status: 'success', message: `User is now ${user.isAdmin ? 'an admin' : 'a regular user'}`, data: { isAdmin: user.isAdmin } });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Failed to update user' });
+  }
+};
+
+// @desc    Toggle user premium status
+// @route   PATCH /api/admin/users/:id/toggle-premium
+// @access  Private (Admin only)
+exports.toggleUserPremium = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ status: 'error', message: 'User not found' });
+    user.isPremium = !user.isPremium;
+    user.premiumExpiresAt = user.isPremium ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : null;
+    await user.save();
+    res.json({ status: 'success', message: `User premium ${user.isPremium ? 'enabled' : 'disabled'}`, data: { isPremium: user.isPremium } });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Failed to update user' });
+  }
+};
+
+// @desc    Delete a user
+// @route   DELETE /api/admin/users/:id
+// @access  Private (Admin only)
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ status: 'error', message: 'User not found' });
+    if (user._id.toString() === req.user._id.toString())
+      return res.status(400).json({ status: 'error', message: 'Cannot delete your own account' });
+    await Attempt.deleteMany({ user: user._id });
+    await Result.deleteMany({ user: user._id });
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ status: 'success', message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Failed to delete user' });
+  }
+};

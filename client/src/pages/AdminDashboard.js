@@ -115,7 +115,7 @@ const AdminDashboard = () => {
           <h3>Manage Tests</h3>
           <p>View, edit & delete tests</p>
         </div>
-        <div className="action-card">
+        <div className="action-card" onClick={() => navigate('/admin/users')}>
           <div className="action-icon">👥</div>
           <h3>Users</h3>
           <p>{stats.stats.totalUsers} registered</p>
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
 
       {/* Statistics Cards */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card clickable" onClick={() => navigate('/admin/tests')}>
           <div className="stat-icon">📊</div>
           <div className="stat-content">
             <h3>{stats.stats.totalTests}</h3>
@@ -132,7 +132,7 @@ const AdminDashboard = () => {
             <span className="stat-sub">{stats.stats.activeTests} active</span>
           </div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card clickable" onClick={() => navigate('/admin/users')}>
           <div className="stat-icon">👤</div>
           <div className="stat-content">
             <h3>{stats.stats.totalUsers}</h3>
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
             <span className="stat-sub">{stats.stats.premiumUsers} premium</span>
           </div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card clickable" onClick={() => navigate('/admin/users')}>
           <div className="stat-icon">✍️</div>
           <div className="stat-content">
             <h3>{stats.stats.totalAttempts}</h3>
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
             <span className="stat-sub">{stats.stats.completedAttempts} completed</span>
           </div>
         </div>
-        <div className="stat-card">
+        <div className="stat-card clickable" onClick={() => navigate('/admin/users')}>
           <div className="stat-icon">✅</div>
           <div className="stat-content">
             <h3>{stats.stats.totalResults}</h3>

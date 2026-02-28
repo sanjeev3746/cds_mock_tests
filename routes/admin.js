@@ -41,4 +41,10 @@ router.delete('/tests/:id', protect, adminOnly, adminController.deleteTest);
 // @desc    Toggle test active status
 router.patch('/tests/:id/toggle-status', protect, adminOnly, adminController.toggleTestStatus);
 
+// User management routes
+router.get('/users', protect, adminOnly, adminController.getAllUsers);
+router.patch('/users/:id/toggle-admin', protect, adminOnly, adminController.toggleUserAdmin);
+router.patch('/users/:id/toggle-premium', protect, adminOnly, adminController.toggleUserPremium);
+router.delete('/users/:id', protect, adminOnly, adminController.deleteUser);
+
 module.exports = router;
