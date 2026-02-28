@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { getAuthToken } from '../utils/auth';
+import API_URL from '../config';
 import './Profile.css';
 
 const PLANS = [
@@ -43,7 +44,7 @@ function Profile() {
       }
 
       const token = getAuthToken();
-      const orderRes = await fetch('/api/payment/create-order', {
+      const orderRes = await fetch(`${API_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: planId }),
@@ -68,7 +69,7 @@ function Profile() {
         theme: { color: '#6c63ff' },
         handler: async (response) => {
           try {
-            const verifyRes = await fetch('/api/payment/verify', {
+            const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
               method: 'POST',
               headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -116,7 +117,7 @@ function Profile() {
 
     try {
       const token = getAuthToken();
-      const response = await fetch('/api/auth/profile', {
+      const response = await fetch(`${API_URL}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
