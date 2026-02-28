@@ -3,6 +3,22 @@ import { AuthContext } from '../context/AuthContext';
 import { getAuthToken } from '../utils/auth';
 import './Profile.css';
 
+const PLANS = [
+  { id: 'monthly', label: '1 Month', price: 99,  display: '₹99/month',  popular: false },
+  { id: 'yearly',  label: '1 Year',  price: 499, display: '₹499/year',  popular: true  },
+];
+
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 function Profile() {
   const { user, login } = useContext(AuthContext);
   const [editing, setEditing] = useState(false);
@@ -12,6 +28,79 @@ function Profile() {
   });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState('');
+
+  const handleUpgrade = async (planId) => {
+    setPaymentLoading(true);
+    setPaymentMessage('');
+    try {
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        setPaymentMessage('Failed to load payment gateway. Check your internet connection.');
+        setPaymentLoading(false);
+        return;
+      }
+
+      const token = getAuthToken();
+      const orderRes = await fetch('/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId }),
+      });
+      const orderData = await orderRes.json();
+      if (orderData.status !== 'success') {
+        setPaymentMessage(orderData.message || 'Failed to initiate payment.');
+        setPaymentLoading(false);
+        return;
+      }
+
+      const { orderId, amount, currency, keyId, planLabel, userName, userEmail } = orderData.data;
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        amount,
+        currency,
+        name: 'CDS Mock Tests',
+        description: 'Premium Plan - ' + planLabel,
+        order_id: orderId,
+        prefill: { name: userName, email: userEmail },
+        theme: { color: '#6c63ff' },
+        handler: async (response) => {
+          try {
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature:  response.razorpay_signature,
+                plan: planId,
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.status === 'success') {
+              login(verifyData.data.user, token);
+              setPaymentMessage('Premium activated successfully! Welcome to Premium 🎉');
+            } else {
+              setPaymentMessage(verifyData.message || 'Payment verification failed.');
+            }
+          } catch (err) {
+            setPaymentMessage('Verification error. Contact support with your payment ID.');
+          } finally {
+            setPaymentLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => setPaymentLoading(false),
+        },
+      });
+      rzp.open();
+    } catch (err) {
+      setPaymentMessage('Something went wrong. Please try again.');
+      setPaymentLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -207,10 +296,35 @@ function Profile() {
                   <div className="subscription-icon">🆓</div>
                   <div className="subscription-details">
                     <h3>Free Plan</h3>
-                    <p>1 mock test per week</p>
-                    <button className="btn btn-secondary mt-20">
-                      Upgrade to Premium - ₹99/month
-                    </button>
+                    <p>1 mock test per week. Upgrade to unlock everything.</p>
+
+                    {paymentMessage && (
+                      <div className={`alert ${paymentMessage.includes('success') || paymentMessage.includes('activated') ? 'alert-success' : 'alert-error'}`}>
+                        {paymentMessage}
+                      </div>
+                    )}
+
+                    <div className="plan-cards">
+                      {PLANS.map((plan) => (
+                        <div key={plan.id} className={`plan-card${plan.popular ? ' plan-card-popular' : ''}`}>
+                          {plan.popular && <div className="plan-badge">Best Value</div>}
+                          <div className="plan-label">{plan.label}</div>
+                          <div className="plan-price">{plan.display}</div>
+                          <ul className="plan-features">
+                            <li>✓ Unlimited mock tests</li>
+                            <li>✓ Detailed analytics</li>
+                            <li>✓ Leaderboard access</li>
+                          </ul>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => handleUpgrade(plan.id)}
+                            disabled={paymentLoading}
+                          >
+                            {paymentLoading ? 'Processing...' : 'Upgrade - ' + plan.display}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
