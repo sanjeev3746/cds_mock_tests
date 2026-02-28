@@ -405,7 +405,7 @@ const EditTest = () => {
             />
             <div className="question-toolbar">
               <button type="button" className="toolbar-btn" onClick={insertTableTemplate}>📊 Insert Table</button>
-              <span className="toolbar-hint">Math: <code>$x^2$</code> or <code>$$\frac{{a}}{{b}}$$</code></span>
+              <span className="toolbar-hint">Math: <code>$x^2$</code> or <code>{'$$\\frac{a}{b}$$'}</code></span>
             </div>
             {currentQuestion.questionText && currentQuestion.questionText.trim() && (
               <div className="math-preview">
