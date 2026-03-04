@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getAuthToken } from '../utils/auth';
 import MathText from '../components/MathText';
+import MathToolbar from '../components/MathToolbar';
 import './ManualTestCreator.css';
 
 const EditTest = () => {
@@ -32,20 +33,9 @@ const EditTest = () => {
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
   const questionTextRef = useRef(null);
-
-  const insertTableTemplate = () => {
-    const template = `\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
-    const el = questionTextRef.current;
-    if (el) {
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
-      const newText = currentQuestion.questionText.slice(0, start) + template + currentQuestion.questionText.slice(end);
-      handleQuestionChange('questionText', newText);
-      setTimeout(() => { el.selectionStart = el.selectionEnd = start + template.length; el.focus(); }, 0);
-    } else {
-      handleQuestionChange('questionText', currentQuestion.questionText + template);
-    }
-  };
+  const directionsRef   = useRef(null);
+  const explanationRef  = useRef(null);
+  const optionEls       = useRef([]);
 
   useEffect(() => {
     fetchTestData();
@@ -388,11 +378,23 @@ const EditTest = () => {
           <div className="form-group">
             <label>Directions (optional)</label>
             <textarea
+              ref={directionsRef}
               value={currentQuestion.directions}
               onChange={e => handleQuestionChange('directions', e.target.value)}
-              placeholder="Write directions for this question (e.g., Arrange the parts to form a meaningful sentence)"
+              placeholder="Write directions for this question. Use $...$ for math."
               rows="2"
             />
+            <MathToolbar
+              textRef={directionsRef}
+              value={currentQuestion.directions}
+              onChange={val => handleQuestionChange('directions', val)}
+            />
+            {currentQuestion.directions && currentQuestion.directions.trim() && (
+              <div className="math-preview">
+                <span className="math-preview-label">Preview:</span>
+                <MathText text={currentQuestion.directions} />
+              </div>
+            )}
           </div>
           <div className="form-group">
             <label>Question Text *</label>
@@ -403,10 +405,12 @@ const EditTest = () => {
               placeholder="Enter question here. Use $...$ for math e.g. $x^2$, or click 'Insert Table' to add a table."
               rows="4"
             />
-            <div className="question-toolbar">
-              <button type="button" className="toolbar-btn" onClick={insertTableTemplate}>📊 Insert Table</button>
-              <span className="toolbar-hint">Math: <code>$x^2$</code> or <code>{'$$\\frac{a}{b}$$'}</code></span>
-            </div>
+            <MathToolbar
+              textRef={questionTextRef}
+              value={currentQuestion.questionText}
+              onChange={val => handleQuestionChange('questionText', val)}
+              showTable={true}
+            />
             {currentQuestion.questionText && currentQuestion.questionText.trim() && (
               <div className="math-preview">
                 <span className="math-preview-label">Preview:</span>
@@ -467,11 +471,17 @@ const EditTest = () => {
                     <label>Option {String.fromCharCode(65 + index)}</label>
                     <input
                       type="text"
+                      ref={el => (optionEls.current[index] = el)}
                       value={option}
                       onChange={(e) => handleOptionChange(index, e.target.value)}
                       placeholder={`Option ${String.fromCharCode(65 + index)} — use $...$ for math`}
                     />
-                    {option && option.trim() && option.includes('$') && (
+                    <MathToolbar
+                      textRef={{ current: optionEls.current[index] }}
+                      value={option}
+                      onChange={val => handleOptionChange(index, val)}
+                    />
+                    {option && option.trim() && (
                       <div className="math-preview" style={{ marginTop: '4px', padding: '4px 8px' }}>
                         <MathText text={option} />
                       </div>
@@ -500,11 +510,23 @@ const EditTest = () => {
           <div className="form-group">
             <label>Explanation (optional)</label>
             <textarea
+              ref={explanationRef}
               value={currentQuestion.explanation}
               onChange={(e) => handleQuestionChange('explanation', e.target.value)}
-              placeholder="Explain why this answer is correct..."
+              placeholder="Explain why this answer is correct... Use $...$ for math."
               rows="2"
             />
+            <MathToolbar
+              textRef={explanationRef}
+              value={currentQuestion.explanation}
+              onChange={val => handleQuestionChange('explanation', val)}
+            />
+            {currentQuestion.explanation && currentQuestion.explanation.trim() && (
+              <div className="math-preview">
+                <span className="math-preview-label">Preview:</span>
+                <MathText text={currentQuestion.explanation} />
+              </div>
+            )}
           </div>
           <button className="btn-add-question" onClick={addQuestion}>
             + Add Question
