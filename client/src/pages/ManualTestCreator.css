@@ -464,6 +464,12 @@
   font-size: 1.05em;
 }
 
+/* Make plain text inside MathText the same weight as KaTeX (normal/400)
+   so math and surrounding words look identical in thickness */
+.math-text {
+  font-weight: 400;
+}
+
 .math-block {
   display: block;
   overflow-x: auto;

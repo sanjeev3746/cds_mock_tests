@@ -105,6 +105,7 @@
 
 .question-text {
   font-size: 18px;
+  font-weight: 400;
   color: var(--dark-text);
   line-height: 1.6;
   margin-bottom: 24px;
@@ -149,6 +150,7 @@
 
 .option-text {
   flex: 1;
+  font-weight: 400;
   color: var(--dark-text);
 }
 
