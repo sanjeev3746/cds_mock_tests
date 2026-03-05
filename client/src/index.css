@@ -30,6 +30,25 @@ body {
   line-height: 1.6;
 }
 
+/* ── KaTeX font-weight normalisation ──────────────────────────────
+   KaTeX uses its own math fonts which render noticeably thinner than
+   surrounding body text. Force all KaTeX elements to inherit the
+   page's normal font-weight so math and text look the same thickness.
+──────────────────────────────────────────────────────────────────── */
+.katex,
+.katex *,
+.katex .katex-html,
+.katex .katex-html * {
+  font-weight: inherit !important;
+}
+
+/* KaTeX math italic characters must stay italic, but at normal weight */
+.katex .mathnormal,
+.katex .mathit {
+  font-style: italic;
+  font-weight: inherit !important;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
