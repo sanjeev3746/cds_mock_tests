@@ -3,56 +3,77 @@ import React from 'react';
 /**
  * Reusable math/table toolbar.
  *
- * Nesting workflow: type an expression (e.g. $\frac{a}{b}$), SELECT it,
- * then click a button to wrap it — enabling unlimited nesting:
- *   √ inside √, frac inside √, √ inside frac, frac inside frac, etc.
+ * CONTEXT-AWARE: detects whether the cursor is already inside $...$ math.
+ *   - Outside math → buttons insert with $...$ wrappers
+ *   - Inside  math → buttons insert raw LaTeX only (no extra $)
  *
- * Props:
- *   textRef   - React ref pointing to the textarea/input element
- *   value     - current string value of the field
- *   onChange  - callback(newValue: string)
- *   showTable - if true, shows the "📊 Table" button (default false)
+ * NESTING: select any expression (with or without $), click a button to wrap.
+ *   Supports: √ inside √, frac inside √, √ inside frac, frac inside frac, etc.
  */
 const MathToolbar = ({ textRef, value, onChange, showTable = false }) => {
-  /**
-   * insertOrWrap — if text is selected, strip outer $…$ and wrap the inner
-   * LaTeX with wrapFn; otherwise insert the plain template.
-   *
-   * @param {string}   template          - inserted when nothing is selected
-   * @param {number}   noSelCursorOffset - cursor position when nothing selected
-   * @param {function} wrapFn            - inner => wrappedLatex (no $ delimiters)
-   * @param {number}   wrapCursorFromEnd - chars from end of result to place cursor
-   *                                       (0 = at end, 2 = before last `}$`, etc.)
-   */
-  const insertOrWrap = (template, noSelCursorOffset, wrapFn, wrapCursorFromEnd) => {
-    const el = textRef && textRef.current;
-    if (!el) { onChange(value + template); return; }
 
-    const start = el.selectionStart;
-    const end   = el.selectionEnd;
-    const selected = value.slice(start, end);
-
-    let newText, newCursor;
-
-    if (selected.length > 0) {
-      // Strip surrounding $…$ if selection is a complete math expression
-      let inner = selected.trim();
-      if (inner.startsWith('$') && inner.endsWith('$') && inner.length > 2) {
-        inner = inner.slice(1, -1);
+  /** True if cursor position `pos` is inside an inline $...$ block */
+  const isInsideMath = (pos) => {
+    let count = 0;
+    for (let i = 0; i < pos; i++) {
+      if (value[i] === '$') {
+        // skip $$ (block math delimiter)
+        if (i + 1 < value.length && value[i + 1] === '$') { i++; }
+        else count++;
       }
-      const wrapped = `$${wrapFn(inner)}$`;
-      newText   = value.slice(0, start) + wrapped + value.slice(end);
-      newCursor = start + wrapped.length - wrapCursorFromEnd;
+    }
+    return count % 2 === 1;
+  };
+
+  /**
+   * Context-aware insert / wrap.
+   *
+   * @param {string}   template      Raw LaTeX template (no $), e.g. `\sqrt{}`
+   * @param {number}   tplFromEnd    Cursor chars from end of template, e.g. 1 → before last `}`
+   * @param {function} wrapFn        inner => wrapped raw LaTeX, e.g. inner => `\sqrt{${inner}}`
+   * @param {number}   wrapFromEnd   Cursor chars from end of wrapped LaTeX (0 = at end)
+   */
+  const applyMath = (template, tplFromEnd, wrapFn, wrapFromEnd) => {
+    const el = textRef && textRef.current;
+    if (!el) { onChange(value + `$${template}$`); return; }
+
+    const start  = el.selectionStart;
+    const end    = el.selectionEnd;
+    const sel    = value.slice(start, end).trim();
+    const inside = isInsideMath(start);
+
+    let insert, cursor;
+
+    if (sel.length > 0) {
+      // Strip outer $...$ from selection to get raw inner LaTeX
+      let inner = sel;
+      const hadDollar = inner.startsWith('$') && inner.endsWith('$') && inner.length > 2;
+      if (hadDollar) inner = inner.slice(1, -1);
+
+      const latex = wrapFn(inner);
+      // Stay raw if cursor is inside math and selection had no $
+      if (inside && !hadDollar) {
+        insert = latex;
+      } else {
+        insert = `$${latex}$`;
+      }
+      cursor = start + insert.length
+             - wrapFromEnd
+             - (insert.endsWith('$') ? 1 : 0); // account for trailing $
     } else {
-      newText   = value.slice(0, start) + template + value.slice(end);
-      newCursor = start + noSelCursorOffset;
+      if (inside) {
+        // Inside existing $...$ — insert raw LaTeX, no dollar wrappers
+        insert = template;
+        cursor = start + insert.length - tplFromEnd;
+      } else {
+        // Outside math — wrap with $
+        insert = `$${template}$`;
+        cursor = start + insert.length - tplFromEnd - 1; // -1 for trailing $
+      }
     }
 
-    onChange(newText);
-    setTimeout(() => {
-      el.selectionStart = el.selectionEnd = newCursor;
-      el.focus();
-    }, 0);
+    onChange(value.slice(0, start) + insert + value.slice(end));
+    setTimeout(() => { el.selectionStart = el.selectionEnd = cursor; el.focus(); }, 0);
   };
 
   const insertTable = () => {
@@ -62,9 +83,16 @@ const MathToolbar = ({ textRef, value, onChange, showTable = false }) => {
       const s = el.selectionStart, e = el.selectionEnd;
       onChange(value.slice(0, s) + tpl + value.slice(e));
       setTimeout(() => { el.selectionStart = el.selectionEnd = s + tpl.length; el.focus(); }, 0);
-    } else {
-      onChange(value + tpl);
-    }
+    } else { onChange(value + tpl); }
+  };
+
+  const insertLineGap = () => {
+    const el = textRef && textRef.current;
+    if (el) {
+      const s = el.selectionStart, e = el.selectionEnd;
+      onChange(value.slice(0, s) + '\n\n' + value.slice(e));
+      setTimeout(() => { el.selectionStart = el.selectionEnd = s + 2; el.focus(); }, 0);
+    } else { onChange(value + '\n\n'); }
   };
 
   return (
@@ -76,46 +104,36 @@ const MathToolbar = ({ textRef, value, onChange, showTable = false }) => {
         </button>
       )}
 
-      {/* Power: no selection → $x^{}$; selection → ${selection}^{}$ cursor in exponent */}
+      {/* Power — tplFromEnd=1 (cursor inside {}), wrapFromEnd=1 (cursor in exponent) */}
       <button type="button" className="toolbar-btn"
-        title="Power — click to insert template, or SELECT base then click to set it as base"
-        onClick={() => insertOrWrap('$x^{}$', 4, inner => `{${inner}}^{}`, 2)}>
+        title="Power: click for template, or SELECT base then click. Works inside existing math."
+        onClick={() => applyMath('x^{}', 1, inner => `{${inner}}^{}`, 1)}>
         x<sup>n</sup> Power
       </button>
 
-      {/* Sqrt: no selection → $\sqrt{}$; selection → $\sqrt{selection}$ */}
+      {/* Sqrt — tplFromEnd=1 (cursor inside {}), wrapFromEnd=0 (cursor after expression) */}
       <button type="button" className="toolbar-btn"
-        title="Square Root — click to insert template, or SELECT expression then click to wrap it under √"
-        onClick={() => insertOrWrap('$\\sqrt{}$', 7, inner => `\\sqrt{${inner}}`, 0)}>
+        title="Square Root: click for template, or SELECT expression then click to wrap. Works inside existing math."
+        onClick={() => applyMath('\\sqrt{}', 1, inner => `\\sqrt{${inner}}`, 0)}>
         √ Sqrt
       </button>
 
-      {/* Frac: no selection → $\frac{}{}$; selection → $\frac{selection}{}$ cursor in denominator */}
+      {/* Frac — tplFromEnd=3 (cursor in numerator {}), wrapFromEnd=1 (cursor in denominator {}) */}
       <button type="button" className="toolbar-btn"
-        title="Fraction — click to insert template, or SELECT numerator then click (cursor lands in denominator)"
-        onClick={() => insertOrWrap('$\\frac{}{}$', 7, inner => `\\frac{${inner}}{}`, 2)}>
+        title="Fraction: click for template, or SELECT numerator then click (cursor lands in denominator). Works inside existing math."
+        onClick={() => applyMath('\\frac{}{}', 3, inner => `\\frac{${inner}}{}`, 1)}>
         ½ Frac
       </button>
 
-      {/* Line break: inserts a blank line for spacing */}
       <button type="button" className="toolbar-btn"
-        title="Insert a blank line for paragraph/line spacing"
-        onClick={() => {
-          const el = textRef && textRef.current;
-          if (el) {
-            const s = el.selectionStart, e = el.selectionEnd;
-            const nl = '\n\n';
-            onChange(value.slice(0, s) + nl + value.slice(e));
-            setTimeout(() => { el.selectionStart = el.selectionEnd = s + nl.length; el.focus(); }, 0);
-          } else { onChange(value + '\n\n'); }
-        }}>
+        title="Insert blank line for spacing between sentences"
+        onClick={insertLineGap}>
         ↵ Line Gap
       </button>
 
       <span className="toolbar-hint">
-        <strong>Nesting tip:</strong> select an expression then click a button to wrap it
-        &nbsp;·&nbsp; <code>$x^&#123;12&#125;$</code>
-        &nbsp;·&nbsp; <code>$\sqrt&#123;\frac&#123;a&#125;&#123;b&#125;&#125;$</code>
+        <strong>Tip:</strong> click inside <code>$...$</code> then use buttons — no extra <code>$</code> added!
+        &nbsp;Select text → click button to wrap (nesting works).
       </span>
     </div>
   );
