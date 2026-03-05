@@ -97,6 +97,21 @@ const MathToolbar = ({ textRef, value, onChange, showTable = false }) => {
         ½ Frac
       </button>
 
+      {/* Line break: inserts a blank line for spacing */}
+      <button type="button" className="toolbar-btn"
+        title="Insert a blank line for paragraph/line spacing"
+        onClick={() => {
+          const el = textRef && textRef.current;
+          if (el) {
+            const s = el.selectionStart, e = el.selectionEnd;
+            const nl = '\n\n';
+            onChange(value.slice(0, s) + nl + value.slice(e));
+            setTimeout(() => { el.selectionStart = el.selectionEnd = s + nl.length; el.focus(); }, 0);
+          } else { onChange(value + '\n\n'); }
+        }}>
+        ↵ Line Gap
+      </button>
+
       <span className="toolbar-hint">
         <strong>Nesting tip:</strong> select an expression then click a button to wrap it
         &nbsp;·&nbsp; <code>$x^&#123;12&#125;$</code>

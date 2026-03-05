@@ -100,7 +100,7 @@ function MathText({ text }) {
             return (
               <span
                 key={i}
-                style={{ display: 'block', overflowX: 'auto', textAlign: 'center', margin: '0.4rem 0' }}
+                style={{ display: 'block', overflowX: 'auto', textAlign: 'left', margin: '0.4rem 0' }}
                 dangerouslySetInnerHTML={{ __html: renderKatex(token.content, true) }}
               />
             );
@@ -111,8 +111,19 @@ function MathText({ text }) {
                 dangerouslySetInnerHTML={{ __html: renderKatex(token.content, false) }}
               />
             );
-          default:
-            return <span key={i}>{token.content}</span>;
+          default: {
+            // Render \n\n as paragraph gap, single \n as <br/>
+            const lines = token.content.split(/(\n\n|\n)/);
+            return (
+              <span key={i}>
+                {lines.map((seg, j) => {
+                  if (seg === '\n\n') return <span key={j} style={{ display: 'block', marginTop: '0.6rem' }} />;
+                  if (seg === '\n') return <br key={j} />;
+                  return <span key={j}>{seg}</span>;
+                })}
+              </span>
+            );
+          }
         }
       })}
     </span>
