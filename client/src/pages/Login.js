@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from '../context/AuthContext';
 import './Auth.css';
 
@@ -88,6 +89,40 @@ function Login() {
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
+
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              setError('');
+              setLoading(true);
+              try {
+                const response = await fetch('/api/auth/google', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ credential: credentialResponse.credential }),
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                  login(data.data.user, data.data.token);
+                  navigate('/dashboard');
+                } else {
+                  setError(data.message || 'Google login failed');
+                }
+              } catch (err) {
+                setError('Network error. Please try again.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            onError={() => setError('Google login failed. Please try again.')}
+            width="100%"
+            text="continue_with"
+            shape="rectangular"
+            theme="outline"
+          />
 
           <p className="auth-footer">
             Don't have an account? <Link to="/register">Register here</Link>

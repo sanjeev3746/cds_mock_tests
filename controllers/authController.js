@@ -1,6 +1,9 @@
 const { validationResult } = require('express-validator');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const { generateToken } = require('../utils/helpers');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Register a new user
 exports.register = async (req, res) => {
@@ -221,6 +224,71 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to change password'
+    });
+  }
+};
+
+// @desc    Google OAuth login / register
+exports.googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ status: 'error', message: 'Google credential is required' });
+    }
+
+    // Verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, email_verified } = payload;
+
+    if (!email_verified) {
+      return res.status(400).json({ status: 'error', message: 'Google account email is not verified' });
+    }
+
+    // Find or create user
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (user) {
+      // Link Google ID if signed up with email before
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        name,
+        email,
+        googleId,
+      });
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      status: 'success',
+      message: 'Google login successful',
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          isPremium: user.isPremium,
+          isAdmin: user.isAdmin,
+          stats: user.stats,
+        },
+        token,
+      },
+    });
+  } catch (error) {
+    console.error('Google Login Error:', error);
+    res.status(401).json({
+      status: 'error',
+      message: 'Google authentication failed. Please try again.',
     });
   }
 };

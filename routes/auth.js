@@ -39,4 +39,9 @@ router.put('/password', protect, [
   body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters'),
 ], authController.changePassword);
 
+// @route   POST /api/auth/google
+// @desc    Login or register with Google
+// @access  Public
+router.post('/google', authController.googleLogin);
+
 module.exports = router;

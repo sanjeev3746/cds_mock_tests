@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -68,6 +69,7 @@ function App() {
   }
 
   return (
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
     <AuthContext.Provider value={{ user, login, logout }}>
       <Router>
         <div className="App">
@@ -94,6 +96,7 @@ function App() {
         </div>
       </Router>
     </AuthContext.Provider>
+    </GoogleOAuthProvider>
   );
 }
 
