@@ -48,6 +48,7 @@ function Dashboard() {
       <div className="container">
         <div className="dashboard-header">
           <div>
+            <span className="dashboard-kicker">Student workspace</span>
             <h1>Welcome back, {user.name}! 🎖️</h1>
             <p className="subtitle">Continue your CDS preparation journey</p>
           </div>

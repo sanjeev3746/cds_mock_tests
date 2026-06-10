@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { AuthContext } from '../context/AuthContext';
+import { getDashboardRoute } from '../utils/navigation';
 import './Auth.css';
 
 function Login() {
@@ -40,7 +41,7 @@ function Login() {
 
       if (data.status === 'success') {
         login(data.data.user, data.data.token);
-        navigate('/dashboard');
+        navigate(getDashboardRoute(data.data.user), { replace: true });
       } else {
         setError(data.message || 'Login failed');
       }
@@ -107,7 +108,7 @@ function Login() {
                 const data = await response.json();
                 if (data.status === 'success') {
                   login(data.data.user, data.data.token);
-                  navigate('/dashboard');
+                  navigate(getDashboardRoute(data.data.user), { replace: true });
                 } else {
                   setError(data.message || 'Google login failed');
                 }

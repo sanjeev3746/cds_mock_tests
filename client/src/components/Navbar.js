@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { getDashboardRoute } from '../utils/navigation';
 import './Navbar.css';
 
 function Navbar() {
@@ -17,7 +18,7 @@ function Navbar() {
         <ul className="nav-links">
           {user ? (
             <>
-              <li><Link to="/dashboard">Dashboard</Link></li>
+              <li><Link to={getDashboardRoute(user)}>Dashboard</Link></li>
               <li><Link to="/tests">Tests</Link></li>
               <li><Link to="/results">My Results</Link></li>
               {user.isAdmin && (

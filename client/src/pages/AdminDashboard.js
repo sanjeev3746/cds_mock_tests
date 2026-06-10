@@ -94,6 +94,7 @@ const AdminDashboard = () => {
   return (
     <div className="admin-dashboard">
       <div className="dashboard-header">
+        <span className="dashboard-kicker admin">Control center</span>
         <h1>Admin Dashboard</h1>
         <p>Manage your CDS Mock Test Platform</p>
       </div>

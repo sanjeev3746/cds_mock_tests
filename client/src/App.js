@@ -21,6 +21,7 @@ import ManualTestCreator from './pages/ManualTestCreator';
 import EditTest from './pages/EditTest';
 import { AuthContext } from './context/AuthContext';
 import { getAuthToken, removeAuthToken } from './utils/auth';
+import { getDashboardRoute } from './utils/navigation';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -76,9 +77,9 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
-            <Route path="/register" element={!user ? <Register /> : <Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+            <Route path="/login" element={!user ? <Login /> : <Navigate to={getDashboardRoute(user)} replace />} />
+            <Route path="/register" element={!user ? <Register /> : <Navigate to={getDashboardRoute(user)} replace />} />
+            <Route path="/dashboard" element={user && !user.isAdmin ? <Dashboard /> : <Navigate to={user ? '/admin/dashboard' : '/login'} replace />} />
             <Route path="/tests" element={user ? <Tests /> : <Navigate to="/login" />} />
             <Route path="/tests/:id" element={user ? <TestDetail /> : <Navigate to="/login" />} />
             <Route path="/test/:attemptId" element={user ? <TakeTest /> : <Navigate to="/login" />} />
@@ -86,12 +87,12 @@ function App() {
             <Route path="/results/:id" element={user ? <ResultDetail /> : <Navigate to="/login" />} />
             <Route path="/leaderboard/:testId" element={user ? <Leaderboard /> : <Navigate to="/login" />} />
             <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
-            <Route path="/admin/dashboard" element={user ? <AdminDashboard /> : <Navigate to="/login" />} />
-            <Route path="/admin/upload" element={user ? <AdminUpload /> : <Navigate to="/login" />} />
-            <Route path="/admin/tests" element={user ? <AdminTests /> : <Navigate to="/login" />} />
-            <Route path="/admin/users" element={user ? <AdminUsers /> : <Navigate to="/login" />} />
-            <Route path="/admin/create" element={user ? <ManualTestCreator /> : <Navigate to="/login" />} />
-            <Route path="/admin/edit-test/:id" element={user ? <EditTest /> : <Navigate to="/login" />} />
+            <Route path="/admin/dashboard" element={user?.isAdmin ? <AdminDashboard /> : <Navigate to={user ? '/dashboard' : '/login'} replace />} />
+            <Route path="/admin/upload" element={user?.isAdmin ? <AdminUpload /> : <Navigate to={user ? '/dashboard' : '/login'} replace />} />
+            <Route path="/admin/tests" element={user?.isAdmin ? <AdminTests /> : <Navigate to={user ? '/dashboard' : '/login'} replace />} />
+            <Route path="/admin/users" element={user?.isAdmin ? <AdminUsers /> : <Navigate to={user ? '/dashboard' : '/login'} replace />} />
+            <Route path="/admin/create" element={user?.isAdmin ? <ManualTestCreator /> : <Navigate to={user ? '/dashboard' : '/login'} replace />} />
+            <Route path="/admin/edit-test/:id" element={user?.isAdmin ? <EditTest /> : <Navigate to={user ? '/dashboard' : '/login'} replace />} />
           </Routes>
         </div>
       </Router>

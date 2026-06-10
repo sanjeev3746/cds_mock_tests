@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { getDashboardRoute } from '../utils/navigation';
 import './Auth.css';
 
 function Register() {
@@ -41,7 +42,7 @@ function Register() {
 
       if (data.status === 'success') {
         login(data.data.user, data.data.token);
-        navigate('/dashboard');
+        navigate(getDashboardRoute(data.data.user), { replace: true });
       } else {
         setError(data.message || 'Registration failed');
       }
